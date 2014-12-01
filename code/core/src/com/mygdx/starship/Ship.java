@@ -68,6 +68,7 @@ public class Ship
 		// Handle input.
 		updateInput();
 		
+		
 		// Reduce acceleration to zero gradually.
 		acceleration.set(acceleration.x * 0.98f * dt, acceleration.y * 0.98f * dt, acceleration.z * 0.98f * dt);
 		
@@ -83,6 +84,8 @@ public class Ship
 		angularVelocity = angularAcceleration * dt;
 		direction += angularVelocity * dt;
 		
+		
+		
 		// Update weapon.
 		weapon.update(dt);
 	}
@@ -94,9 +97,7 @@ public class Ship
 			inputArray[i] = 0;
 		}	
 		int inputArrayIdx = 0;
-		
-		newInput = false;
-		
+			
 		if (Gdx.input.isKeyPressed(Keys.A))
 		{
 			angularAcceleration += turnPower;
@@ -125,6 +126,10 @@ public class Ship
 			// End data if array is filled with something.
 			inputArray[inputArrayIdx++] = '\n';
 			newInput = true;
+		}
+		else
+		{
+			newInput = false;
 		}
 	}
 	

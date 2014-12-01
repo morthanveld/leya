@@ -73,7 +73,54 @@ public class Game extends ApplicationAdapter
 //		connectionHandler.addPacket(new Packet(ship.getInputArray()));
 		//networkWrite();
 		
+		receivePacket();
+		
 		sendPlayerInput();
+		//connectionHandler.addPacket(new Packet("ABC\n".getBytes()));
+	}
+	
+	public void receivePacket()
+	{
+		Packet p = null;
+		byte[] data = null;
+		while ((p = connectionHandler.getPacket()) != null)
+		{
+			data = p.getData();
+			
+			if (data.length > 0)
+			{
+				for (byte j : data)
+				{
+					System.out.println(j + " ");
+				}
+				System.out.println();
+				
+				if (data[0] == Packet.POSITION)
+				{
+					// Keyboard input from player.
+					System.out.println("client: position from server");
+					
+					/*
+					for (int k = 1; k < data.length; k++)
+					{
+						//handleInput(data[k]);
+						System.out.print(data[k] + " ");
+					}
+					System.out.println();
+					*/
+					
+					float x = byteToFloat(data[1], data[2], data[3], data[4]);
+					float y = byteToFloat(data[5], data[6], data[7], data[8]);
+					
+					System.out.println(x + "\t" + y);
+				}
+			
+			}
+			else
+			{
+				System.err.println("client: zero size packet received");
+			}
+		}
 	}
 	
 	public void updateInput()

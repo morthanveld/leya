@@ -86,8 +86,6 @@ public class Weapon
 		targetDirection.set(target.x - 1280.0f * 0.5f, -target.y + 720.0f * 0.5f);
 		targetDirection.nor();
 		
-		newInput = false;
-
 		// Put input in input array.
 		for (int i = 0; i < inputArray.length; i++)
 		{
@@ -127,6 +125,10 @@ public class Weapon
 			// End data if array is filled with something.
 			inputArray[inputArrayIdx++] = '\n';
 			newInput = true;
+		}
+		else
+		{
+			newInput = false;
 		}
 	}
 	

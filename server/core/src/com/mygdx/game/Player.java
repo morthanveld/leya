@@ -64,6 +64,26 @@ public class Player
 		direction += angularVelocity * dt;
 		
 		System.out.println(position);
+		
+		
+		byte[] data = new byte[1 + 4 * 2 + 1];
+		data[0] = Packet.POSITION;
+
+		byte[] x = Packet.floatToBytes(position.x);
+		data[1] = x[0];
+		data[2] = x[1];
+		data[3] = x[2];
+		data[4] = x[3];
+		
+		byte[] y = Packet.floatToBytes(position.y);
+		data[5] = y[0];
+		data[6] = y[1];
+		data[7] = y[2];
+		data[8] = y[3];
+		data[9] = '\n';
+		
+		connection.addPacket(new Packet(data));
+		
 	}
 	
 	public void receivePacket()

@@ -13,25 +13,42 @@ public class ConnectionHandler implements Runnable
 	private ArrayDeque<Packet> packetOutbox;
 	private ArrayDeque<Packet> packetInbox; 
 	
+	private final Object outboxLock = new Object();
+	private final Object inboxLock = new Object();
+	
 	public ConnectionHandler(Socket socket)
 	{
 		clientSocket = socket;
-		packetOutbox = new ArrayDeque<Packet>();
-		packetInbox = new ArrayDeque<Packet>();
+		
+		synchronized (outboxLock) 
+		{
+			packetOutbox = new ArrayDeque<Packet>();
+		}
+		
+		synchronized (inboxLock)
+		{
+			packetInbox = new ArrayDeque<Packet>();
+		}
 	}
 	
 	public void addPacket(Packet p)
 	{
-		packetOutbox.add(p);
+		synchronized (outboxLock) 
+		{
+			packetOutbox.add(p);
+        }
 	}
 	
 	public Packet getPacket()
 	{
-		if (packetInbox.size() == 0)
+		synchronized (inboxLock) 
 		{
-			return null;
+			if (packetInbox.size() == 0)
+			{
+				return null;
+			}
+			return packetInbox.pop();
 		}
-		return packetInbox.pop();
 	}
 	
 	public void run() 
@@ -43,16 +60,21 @@ public class ConnectionHandler implements Runnable
 				break;
 			}
 			
-			// Check if outbox is not empty.
-			if (!packetOutbox.isEmpty())
+			synchronized (outboxLock) 
 			{
-				// Pop and send packet.
-				sendPacket((Packet) packetOutbox.pop());
-				//System.out.println("client: outbox size " + packetOutbox.size());
+				// Check if outbox is not empty.
+				if (!packetOutbox.isEmpty())
+				{
+					// Pop and send packet.
+					sendPacket((Packet) packetOutbox.pop());
+					//System.out.println("client: outbox size " + packetOutbox.size());
+				}
 			}
-			
+
 			// Receive packets.
 			receivePacket();
+			
+			//System.out.println("client handler run");
 		}
 		
 		System.out.println("Client disconnected " + clientSocket.getRemoteAddress());
@@ -89,7 +111,11 @@ public class ConnectionHandler implements Runnable
 
 				// Read data from client.
 				String d = buffer.readLine();
-				packetInbox.add(new Packet(d.getBytes()));
+				
+				synchronized (inboxLock)
+				{
+					packetInbox.add(new Packet(d.getBytes()));
+				}
 				
 				//System.out.println("Inbox: " + packetInbox.size());
 			}
