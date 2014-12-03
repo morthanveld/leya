@@ -13,25 +13,44 @@ public class ConnectionHandler implements Runnable
 	private ArrayDeque<Packet> packetOutbox;
 	private ArrayDeque<Packet> packetInbox; 
 	
+	private final Object outboxLock = new Object();
+	private final Object inboxLock = new Object();
+	
+	private int count = 0;
+	
 	public ConnectionHandler(Socket socket)
 	{
 		clientSocket = socket;
-		packetOutbox = new ArrayDeque<Packet>();
-		packetInbox = new ArrayDeque<Packet>();
+		
+		synchronized (outboxLock) 
+		{
+			packetOutbox = new ArrayDeque<Packet>();
+		}
+		
+		synchronized (inboxLock) 
+		{
+			packetInbox = new ArrayDeque<Packet>();
+		}
 	}
 	
 	public void addPacket(Packet p)
 	{
-		packetOutbox.add(p);
+		synchronized (outboxLock) 
+		{
+			packetOutbox.add(p);
+		}
 	}
 	
 	public Packet getPacket()
 	{
-		if (packetInbox.size() == 0)
+		synchronized (inboxLock) 
 		{
-			return null;
+			if (packetInbox.size() == 0)
+			{
+				return null;
+			}
+			return packetInbox.pop();
 		}
-		return packetInbox.pop();
 	}
 	
 	public void run() 
@@ -43,11 +62,14 @@ public class ConnectionHandler implements Runnable
 				break;
 			}
 			
-			// Check if outbox is not empty.
-			if (!packetOutbox.isEmpty())
+			synchronized (outboxLock) 
 			{
-				// Pop and send packet.
-				sendPacket((Packet) packetOutbox.pop());
+				// Check if outbox is not empty.
+				if (!packetOutbox.isEmpty())
+				{
+					// Pop and send packet.
+					sendPacket((Packet) packetOutbox.pop());
+				}
 			}
 			
 			// Receive packets.
@@ -61,8 +83,19 @@ public class ConnectionHandler implements Runnable
 	{
 		try 
 		{
+			byte[] data = p.getData();
+			for (byte j : data)
+			{
+				System.out.print(j + " ");
+			}
+			System.out.println();
+			
+			System.out.println("server: msg length " + p.getData().length);
 			clientSocket.getOutputStream().write(p.getData());
 			clientSocket.getOutputStream().flush();
+			
+			count++;
+			System.out.println("server: count " + count);
 		} 
 		catch (IOException e) 
 		{
@@ -78,11 +111,14 @@ public class ConnectionHandler implements Runnable
 			{
 				BufferedReader buffer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream())); 
 
-				// Read data from client.
-				String d = buffer.readLine();
-				packetInbox.add(new Packet(d.getBytes()));
-				
-				//System.out.println("Inbox: " + packetInbox.size());
+				synchronized (inboxLock) 
+				{
+					// Read data from client.
+					String d = buffer.readLine();
+					packetInbox.add(new Packet(d.getBytes()));
+
+					//System.out.println("Inbox: " + packetInbox.size());
+				}
 			}
 		} 
 		catch (IOException e) 

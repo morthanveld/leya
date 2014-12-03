@@ -16,6 +16,8 @@ public class ConnectionHandler implements Runnable
 	private final Object outboxLock = new Object();
 	private final Object inboxLock = new Object();
 	
+	private int count = 0;
+	
 	public ConnectionHandler(Socket socket)
 	{
 		clientSocket = socket;
@@ -109,14 +111,32 @@ public class ConnectionHandler implements Runnable
 			{
 				BufferedReader buffer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream())); 
 
-				// Read data from client.
-				String d = buffer.readLine();
-				
-				synchronized (inboxLock)
+				int type = buffer.read();
+								
+				if (type == Packet.POSITION)
 				{
-					packetInbox.add(new Packet(d.getBytes()));
+					byte[] d = new byte[10];
+					d[0] = Packet.POSITION;
+					
+					for (int i = 1; i < 10; i++)
+					{
+						int b = buffer.read();
+						d[i] = (byte) b;
+					}
+					
+					System.out.println("client: msg length " + d.length);
+					
+					synchronized (inboxLock)
+					{
+						packetInbox.add(new Packet(d));
+					}
+					
+					count++;
+					System.out.println("client: count " + count);
 				}
 				
+				// Read data from client.
+				//String d = buffer.readLine();
 				//System.out.println("Inbox: " + packetInbox.size());
 			}
 		} 

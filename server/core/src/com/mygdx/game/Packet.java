@@ -1,5 +1,7 @@
 package com.mygdx.game;
 
+import java.nio.ByteBuffer;
+
 public class Packet 
 {	
 	public static final byte IO_KEYBOARD = 0x1;
@@ -18,6 +20,7 @@ public class Packet
 		return this.data;
 	}
 	
+	/*
 	public static byte[] floatToBytes(float value)
 	{
 		int bits = Float.floatToIntBits(value);
@@ -28,5 +31,11 @@ public class Packet
 		bytes[3] = (byte)((bits >> 24) & 0xff);
 		
 		return bytes;
+	}
+	*/
+	
+	public static byte [] floatToBytes (float value)
+	{  
+	     return ByteBuffer.allocate(4).putFloat(value).array();
 	}
 }

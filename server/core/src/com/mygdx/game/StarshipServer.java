@@ -32,6 +32,16 @@ public class StarshipServer extends ApplicationAdapter
 		updateInput();
 		
 		update(dt);
+		
+		try 
+		{
+			Thread.sleep((long)(1000/5-Gdx.graphics.getDeltaTime()));
+		} 
+		catch (InterruptedException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	/*

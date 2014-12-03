@@ -3,6 +3,8 @@ package com.mygdx.starship;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Arrays;
 
 import com.badlogic.gdx.ApplicationAdapter;
@@ -91,7 +93,7 @@ public class Game extends ApplicationAdapter
 			{
 				for (byte j : data)
 				{
-					System.out.println(j + " ");
+					System.out.print(j + " ");
 				}
 				System.out.println();
 				
@@ -113,6 +115,7 @@ public class Game extends ApplicationAdapter
 					float y = byteToFloat(data[5], data[6], data[7], data[8]);
 					
 					System.out.println(x + "\t" + y);
+					ship.position.set(x, y, 0.0f);
 				}
 			
 			}
@@ -172,13 +175,20 @@ public class Game extends ApplicationAdapter
 		}
 	}
 	
-	private float byteToFloat(Byte a, Byte b, Byte c, Byte d)
+	private float byteToFloat(byte a, byte b, byte c, byte d)
 	{
+		/*
 		int asInt = (a & 0xFF) 
 	            | ((b & 0xFF) << 8) 
 	            | ((c & 0xFF) << 16) 
 	            | ((d & 0xFF) << 24);
 		
 		return Float.intBitsToFloat(asInt);
+		*/
+		byte[] bytes = {a, b, c, d};
+		float f = ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN).getFloat();
+		return f;
 	}
+	
+	
 }

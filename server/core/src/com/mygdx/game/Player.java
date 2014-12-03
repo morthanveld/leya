@@ -96,11 +96,13 @@ public class Player
 			
 			if (data.length > 0)
 			{
+				/*
 				for (byte j : data)
 				{
 					System.out.println(j + " ");
 				}
 				System.out.println();
+				*/
 				
 				if (data[0] == 'A')
 				{

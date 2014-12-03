@@ -68,7 +68,7 @@ public class Ship
 		// Handle input.
 		updateInput();
 		
-		
+		/*
 		// Reduce acceleration to zero gradually.
 		acceleration.set(acceleration.x * 0.98f * dt, acceleration.y * 0.98f * dt, acceleration.z * 0.98f * dt);
 		
@@ -82,9 +82,8 @@ public class Ship
 		
 		angularAcceleration *= 0.98f;
 		angularVelocity = angularAcceleration * dt;
-		direction += angularVelocity * dt;
-		
-		
+		direction += angularVelocity * dt;	
+		*/
 		
 		// Update weapon.
 		weapon.update(dt);
