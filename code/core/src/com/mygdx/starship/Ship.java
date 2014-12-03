@@ -85,6 +85,8 @@ public class Ship
 		direction += angularVelocity * dt;	
 		*/
 		
+		orientation.setFromAxis(0.0f, 0.0f, 1.0f, direction);
+		
 		// Update weapon.
 		weapon.update(dt);
 	}
@@ -160,5 +162,10 @@ public class Ship
 	public void setPosition(float x, float y)
 	{
 		position.set(x, y, position.z);
+	}
+	
+	public void setDirection(float d)
+	{
+		direction = d;
 	}
 }

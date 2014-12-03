@@ -111,6 +111,7 @@ public class ConnectionHandler implements Runnable
 			{
 				BufferedReader buffer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream())); 
 
+				/*
 				int type = buffer.read();
 								
 				if (type == Packet.POSITION)
@@ -134,9 +135,12 @@ public class ConnectionHandler implements Runnable
 					count++;
 					System.out.println("client: count " + count);
 				}
+				*/
 				
 				// Read data from client.
-				//String d = buffer.readLine();
+				String d = buffer.readLine();
+				System.out.println(d);
+				packetInbox.add(new Packet(d.getBytes()));
 				//System.out.println("Inbox: " + packetInbox.size());
 			}
 		} 

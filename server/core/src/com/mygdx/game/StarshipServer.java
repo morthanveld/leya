@@ -35,7 +35,7 @@ public class StarshipServer extends ApplicationAdapter
 		
 		try 
 		{
-			Thread.sleep((long)(1000/5-Gdx.graphics.getDeltaTime()));
+			Thread.sleep((long)(1000/60-Gdx.graphics.getDeltaTime()));
 		} 
 		catch (InterruptedException e) 
 		{

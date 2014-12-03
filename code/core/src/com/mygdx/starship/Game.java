@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
+import java.util.regex.Pattern;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -64,7 +65,7 @@ public class Game extends ApplicationAdapter
 		*/
 			
 		float dt = Math.min(Gdx.graphics.getDeltaTime(), 1.0f / 60f);
-		
+
 		space.update(dt);
 		space.render(camera, ship);
 		
@@ -97,6 +98,40 @@ public class Game extends ApplicationAdapter
 				}
 				System.out.println();
 				
+			
+				
+				String a = new String(data);
+				
+				/*
+				System.out.println("a: " + a);
+				int startIdx = a.indexOf(";");
+				String b = a.substring(startIdx + 1);
+				System.out.println("b: " + b);
+				int endIdx = b.indexOf(";");
+				String x = b.substring(0, endIdx);
+
+				String tmp = b.substring(endIdx + 1);
+				endIdx = tmp.indexOf(";");
+				*/
+				Pattern pattern =  Pattern.compile(";");
+				String[] list = pattern.split(a.subSequence(0, a.length()));
+				
+				/*
+				for (int i = 0; i < list.length; i++)
+				{
+					System.out.println(list[i]);
+				}
+				*/
+				
+				/*
+				System.out.println("x: '" + x + "'    " + Float.valueOf(x).floatValue());
+				System.out.println("y: '" + y + "'    " + Float.valueOf(y).floatValue());
+				*/
+				
+				ship.position.set(Float.valueOf(list[1]).floatValue(), Float.valueOf(list[2]).floatValue(), 0.0f);
+				ship.setDirection(Float.valueOf(list[3]).floatValue());
+				
+				
 				if (data[0] == Packet.POSITION)
 				{
 					// Keyboard input from player.
@@ -111,11 +146,15 @@ public class Game extends ApplicationAdapter
 					System.out.println();
 					*/
 					
+					System.out.println(new String(data));
+
+					/*
 					float x = byteToFloat(data[1], data[2], data[3], data[4]);
 					float y = byteToFloat(data[5], data[6], data[7], data[8]);
 					
 					System.out.println(x + "\t" + y);
 					ship.position.set(x, y, 0.0f);
+					*/
 				}
 			
 			}

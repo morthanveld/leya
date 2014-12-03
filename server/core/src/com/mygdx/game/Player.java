@@ -82,6 +82,17 @@ public class Player
 		data[8] = y[3];
 		data[9] = '\n';
 		
+		StringBuffer a = new StringBuffer();
+		a.append(Packet.POSITION);
+		a.append(";");
+		a.append(position.x);
+		a.append(";");
+		a.append(position.y);
+		a.append(";");
+		a.append(direction);
+		a.append("\n");
+		data = a.toString().getBytes();
+			
 		connection.addPacket(new Packet(data));
 		
 	}
