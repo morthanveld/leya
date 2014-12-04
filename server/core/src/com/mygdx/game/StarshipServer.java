@@ -35,7 +35,7 @@ public class StarshipServer extends ApplicationAdapter
 		
 		try 
 		{
-			Thread.sleep((long)(1000/60-Gdx.graphics.getDeltaTime()));
+			Thread.sleep((long)(1000/10-Gdx.graphics.getDeltaTime()));
 		} 
 		catch (InterruptedException e) 
 		{
@@ -50,9 +50,32 @@ public class StarshipServer extends ApplicationAdapter
 	 */
 	public void update(float dt)
 	{
+		StringBuffer a = new StringBuffer();
+		a.append(Packet.POSITION);
+		
 		for (Player p : players)
 		{
+			// Update player ship.
 			p.update(dt);
+			
+			// Compile data to send.
+			a.append(";");
+			a.append(p.getId());
+			a.append(";");
+			a.append(p.getPosition().x);
+			a.append(";");
+			a.append(p.getPosition().y);
+			a.append(";");
+			a.append(p.getDirection());
+		}
+		
+		a.append("\n");
+		Packet packet = new Packet(a.toString().getBytes());
+
+		// Add position packet to players connection.
+		for (Player p : players)
+		{
+			p.addPacket(packet);
 		}
 	}
 	

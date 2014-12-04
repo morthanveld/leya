@@ -23,8 +23,11 @@ public class Player
 	private float drivePower;
 	private float turnPower;
 	
+	private byte id;
+	
 	public Player(ConnectionHandler connection)
 	{
+		this.id = 0;
 		this.name = new String(connection.toString());
 		this.connection = connection;
 		
@@ -39,6 +42,8 @@ public class Player
 			
 		drivePower = 3200.0f * 5.0f;
 		turnPower = 3000.0f * 0.1f;
+		
+		
 	}
 	
 	public void update(float dt)
@@ -65,36 +70,30 @@ public class Player
 		
 		System.out.println(position);
 		
-		
-		byte[] data = new byte[1 + 4 * 2 + 1];
-		data[0] = Packet.POSITION;
+		/*
+		if (id != 0)
+		{
+			StringBuffer a = new StringBuffer();
+			a.append(id);
+			a.append(";");
+			a.append(Packet.POSITION);
+			a.append(";");
+			a.append(position.x);
+			a.append(";");
+			a.append(position.y);
+			a.append(";");
+			a.append(direction);
+			a.append("\n");
+			byte[] data = a.toString().getBytes();
 
-		byte[] x = Packet.floatToBytes(position.x);
-		data[1] = x[0];
-		data[2] = x[1];
-		data[3] = x[2];
-		data[4] = x[3];
-		
-		byte[] y = Packet.floatToBytes(position.y);
-		data[5] = y[0];
-		data[6] = y[1];
-		data[7] = y[2];
-		data[8] = y[3];
-		data[9] = '\n';
-		
-		StringBuffer a = new StringBuffer();
-		a.append(Packet.POSITION);
-		a.append(";");
-		a.append(position.x);
-		a.append(";");
-		a.append(position.y);
-		a.append(";");
-		a.append(direction);
-		a.append("\n");
-		data = a.toString().getBytes();
-			
-		connection.addPacket(new Packet(data));
-		
+			connection.addPacket(new Packet(data));
+		}
+		*/
+	}
+	
+	public void addPacket(Packet p)
+	{
+		connection.addPacket(p);
 	}
 	
 	public void receivePacket()
@@ -107,25 +106,32 @@ public class Player
 			
 			if (data.length > 0)
 			{
-				/*
+				
 				for (byte j : data)
 				{
 					System.out.println(j + " ");
 				}
 				System.out.println();
-				*/
 				
-				if (data[0] == 'A')
+				
+				System.out.println("server: data from client id " + data[0]);
+				
+				if (id == 0)
+				{
+					id = data[0];
+				}
+				
+				if (data[1] == 'A')
 				{
 					// Keyboard input from player.
 					System.out.println("server: keyboard input from player");
 					
-					for (int k = 1; k < data.length; k++)
+					for (int k = 2; k < data.length; k++)
 					{
 						handleInput(data[k]);
 					}
 				}
-				else if (data[0] == 'B')
+				else if (data[1] == 'B')
 				{
 					// Mouse input from player.
 					System.out.println("server: mouse input from player");
@@ -182,5 +188,13 @@ public class Player
 
 	public void setAcceleration(Vector2 acceleration) {
 		this.acceleration = acceleration;
+	}
+
+	public float getDirection() {
+		return direction;
+	}
+
+	public byte getId() {
+		return id;
 	}
 }

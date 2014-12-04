@@ -32,6 +32,8 @@ public class Game extends ApplicationAdapter
 	
 	ConnectionHandler connectionHandler;
 	
+	byte id = 0;
+	
 	@Override
 	public void create () 
 	{
@@ -41,6 +43,8 @@ public class Game extends ApplicationAdapter
 		space = new Space();
 		
 		camera = new OrthographicCamera(1280, 720);
+		
+		id = (byte) (Math.random() * 200 + 1);
 		
 		// Connect to server.
 		connect();
@@ -116,46 +120,65 @@ public class Game extends ApplicationAdapter
 				Pattern pattern =  Pattern.compile(";");
 				String[] list = pattern.split(a.subSequence(0, a.length()));
 				
-				/*
+				
 				for (int i = 0; i < list.length; i++)
 				{
 					System.out.println(list[i]);
 				}
-				*/
+				
 				
 				/*
 				System.out.println("x: '" + x + "'    " + Float.valueOf(x).floatValue());
 				System.out.println("y: '" + y + "'    " + Float.valueOf(y).floatValue());
 				*/
 				
-				ship.position.set(Float.valueOf(list[1]).floatValue(), Float.valueOf(list[2]).floatValue(), 0.0f);
-				ship.setDirection(Float.valueOf(list[3]).floatValue());
+				
+
+				// Check if position data.
+				if (Byte.valueOf(list[0]) == Packet.POSITION)
+				{
+					int numPlayers = (list.length - 1)/4;
+					System.out.println("numplayers: " + numPlayers);
+					
+					for (int i = 0; i < numPlayers; i++)
+					{
+						// Check if data from server is intended for me.
+						if (Byte.valueOf(list[i * 1 + 1]) == this.id)
+						{
+							// Update position and direction.
+							ship.position.set(Float.valueOf(list[i * 1 + 2]).floatValue(), Float.valueOf(list[i * 1 + 3]).floatValue(), 0.0f);
+							ship.setDirection(Float.valueOf(list[i * 1 + 4]).floatValue());
+						}
+					}
+				}
 				
 				
+				/*
 				if (data[0] == Packet.POSITION)
 				{
 					// Keyboard input from player.
 					System.out.println("client: position from server");
 					
-					/*
+					
 					for (int k = 1; k < data.length; k++)
 					{
 						//handleInput(data[k]);
 						System.out.print(data[k] + " ");
 					}
 					System.out.println();
-					*/
+					
 					
 					System.out.println(new String(data));
 
-					/*
+					
 					float x = byteToFloat(data[1], data[2], data[3], data[4]);
 					float y = byteToFloat(data[5], data[6], data[7], data[8]);
 					
 					System.out.println(x + "\t" + y);
 					ship.position.set(x, y, 0.0f);
-					*/
+					
 				}
+			*/
 			
 			}
 			else
@@ -195,9 +218,10 @@ public class Game extends ApplicationAdapter
 		if (ship.getNewInput())
 		{
 			byte[] a = ship.getInputArray();
-			byte[] b = new byte[a.length + 1];
-			b[0] = 'A';
-			System.arraycopy(a, 0, b, 1, a.length);
+			byte[] b = new byte[a.length + 2];
+			b[0] = id;
+			b[1] = 'A';
+			System.arraycopy(a, 0, b, 2, a.length);
 
 			connectionHandler.addPacket(new Packet(b));
 		}
@@ -206,9 +230,10 @@ public class Game extends ApplicationAdapter
 		if (ship.weapon.getNewInput())
 		{
 			byte[] a = ship.weapon.getInputArray();
-			byte[] b = new byte[a.length + 1];
-			b[0] = 'B';
-			System.arraycopy(a, 0, b, 1, a.length);
+			byte[] b = new byte[a.length + 2];
+			b[0] = id;
+			b[1] = 'B';
+			System.arraycopy(a, 0, b, 2, a.length);
 
 			connectionHandler.addPacket(new Packet(b));
 		}
