@@ -143,11 +143,11 @@ public class Game extends ApplicationAdapter
 					for (int i = 0; i < numPlayers; i++)
 					{
 						// Check if data from server is intended for me.
-						if (Byte.valueOf(list[i * 1 + 1]) == this.id)
+						if (Byte.valueOf(list[i * 4 + 1]) == this.id)
 						{
 							// Update position and direction.
-							ship.position.set(Float.valueOf(list[i * 1 + 2]).floatValue(), Float.valueOf(list[i * 1 + 3]).floatValue(), 0.0f);
-							ship.setDirection(Float.valueOf(list[i * 1 + 4]).floatValue());
+							ship.position.set(Float.valueOf(list[i * 4 + 2]).floatValue(), Float.valueOf(list[i * 4 + 3]).floatValue(), 0.0f);
+							ship.setDirection(Float.valueOf(list[i * 4 + 4]).floatValue());
 						}
 					}
 				}
