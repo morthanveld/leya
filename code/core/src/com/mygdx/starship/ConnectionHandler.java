@@ -69,14 +69,11 @@ public class ConnectionHandler implements Runnable
 				{
 					// Pop and send packet.
 					sendPacket((Packet) packetOutbox.pop());
-					//System.out.println("client: outbox size " + packetOutbox.size());
 				}
 			}
 
 			// Receive packets.
 			receivePacket();
-			
-			//System.out.println("client handler run");
 		}
 		
 		System.out.println("Client disconnected " + clientSocket.getRemoteAddress());
@@ -86,14 +83,6 @@ public class ConnectionHandler implements Runnable
 	{
 		try 
 		{
-			/*
-			byte[] k = p.getData();
-			for (byte j : k)
-			{
-				System.out.print(j + " ");
-			}
-			System.out.println();
-			*/
 			clientSocket.getOutputStream().write(p.getData());
 			clientSocket.getOutputStream().flush();
 		} 
@@ -111,37 +100,10 @@ public class ConnectionHandler implements Runnable
 			{
 				BufferedReader buffer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream())); 
 
-				/*
-				int type = buffer.read();
-								
-				if (type == Packet.POSITION)
-				{
-					byte[] d = new byte[10];
-					d[0] = Packet.POSITION;
-					
-					for (int i = 1; i < 10; i++)
-					{
-						int b = buffer.read();
-						d[i] = (byte) b;
-					}
-					
-					System.out.println("client: msg length " + d.length);
-					
-					synchronized (inboxLock)
-					{
-						packetInbox.add(new Packet(d));
-					}
-					
-					count++;
-					System.out.println("client: count " + count);
-				}
-				*/
-				
 				// Read data from client.
 				String d = buffer.readLine();
 				System.out.println(d);
 				packetInbox.add(new Packet(d.getBytes()));
-				//System.out.println("Inbox: " + packetInbox.size());
 			}
 		} 
 		catch (IOException e) 
@@ -149,5 +111,15 @@ public class ConnectionHandler implements Runnable
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public int getOutboxSize()
+	{
+		return this.packetOutbox.size();
+	}
+	
+	public int getInboxSize()
+	{
+		return this.packetInbox.size();
 	}
 }

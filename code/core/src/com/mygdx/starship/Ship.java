@@ -67,24 +67,7 @@ public class Ship
 	{
 		// Handle input.
 		updateInput();
-		
-		/*
-		// Reduce acceleration to zero gradually.
-		acceleration.set(acceleration.x * 0.98f * dt, acceleration.y * 0.98f * dt, acceleration.z * 0.98f * dt);
-		
-		velocity.mulAdd(acceleration, dt);
-		
-		// Put some viscosity in space. Velocity in opposite direction.
-		velocity.mulAdd(velocity, -0.25f * dt);
-		
-		position.mulAdd(velocity, dt);
-		orientation.setFromAxis(0.0f, 0.0f, 1.0f, direction);
-		
-		angularAcceleration *= 0.98f;
-		angularVelocity = angularAcceleration * dt;
-		direction += angularVelocity * dt;	
-		*/
-		
+				
 		orientation.setFromAxis(0.0f, 0.0f, 1.0f, direction);
 		
 		// Update weapon.

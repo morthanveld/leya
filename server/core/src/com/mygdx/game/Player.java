@@ -42,8 +42,6 @@ public class Player
 			
 		drivePower = 3200.0f * 5.0f;
 		turnPower = 3000.0f * 0.1f;
-		
-		
 	}
 	
 	public void update(float dt)
@@ -67,28 +65,8 @@ public class Player
 		angularAcceleration *= 0.98f;
 		angularVelocity = angularAcceleration * dt;
 		direction += angularVelocity * dt;
-		
-		System.out.println(position);
-		
-		/*
-		if (id != 0)
-		{
-			StringBuffer a = new StringBuffer();
-			a.append(id);
-			a.append(";");
-			a.append(Packet.POSITION);
-			a.append(";");
-			a.append(position.x);
-			a.append(";");
-			a.append(position.y);
-			a.append(";");
-			a.append(direction);
-			a.append("\n");
-			byte[] data = a.toString().getBytes();
-
-			connection.addPacket(new Packet(data));
-		}
-		*/
+	
+		System.out.println(id + " | " + connection.getInboxSize() + " | " + connection.getOutboxSize());
 	}
 	
 	public void addPacket(Packet p)
@@ -106,16 +84,6 @@ public class Player
 			
 			if (data.length > 0)
 			{
-				
-				for (byte j : data)
-				{
-					System.out.println(j + " ");
-				}
-				System.out.println();
-				
-				
-				System.out.println("server: data from client id " + data[0]);
-				
 				if (id == 0)
 				{
 					id = data[0];

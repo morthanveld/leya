@@ -1,6 +1,7 @@
 package com.mygdx.game;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.SocketTimeoutException;
 
 import com.badlogic.gdx.ApplicationAdapter;
@@ -19,6 +20,8 @@ public class StarshipServer extends ApplicationAdapter
 	
 	public void create () 
 	{
+		//System.out.close();
+		
 		players = new Array<Player>();
 		
 		// Start listening on incoming clients.
@@ -35,7 +38,7 @@ public class StarshipServer extends ApplicationAdapter
 		
 		try 
 		{
-			Thread.sleep((long)(1000/10-Gdx.graphics.getDeltaTime()));
+			Thread.sleep((long)(1000/60-Gdx.graphics.getDeltaTime()));
 		} 
 		catch (InterruptedException e) 
 		{

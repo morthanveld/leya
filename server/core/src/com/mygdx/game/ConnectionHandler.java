@@ -83,19 +83,10 @@ public class ConnectionHandler implements Runnable
 	{
 		try 
 		{
-			byte[] data = p.getData();
-			for (byte j : data)
-			{
-				System.out.print(j + " ");
-			}
-			System.out.println();
-			
-			System.out.println("server: msg length " + p.getData().length);
 			clientSocket.getOutputStream().write(p.getData());
 			clientSocket.getOutputStream().flush();
 			
 			count++;
-			System.out.println("server: count " + count);
 		} 
 		catch (IOException e) 
 		{
@@ -116,8 +107,6 @@ public class ConnectionHandler implements Runnable
 					// Read data from client.
 					String d = buffer.readLine();
 					packetInbox.add(new Packet(d.getBytes()));
-
-					//System.out.println("Inbox: " + packetInbox.size());
 				}
 			}
 		} 
@@ -126,5 +115,15 @@ public class ConnectionHandler implements Runnable
 			// Catch if player leaves the game?
 			System.err.println("server: error reading buffer");
 		}
+	}
+	
+	public int getOutboxSize()
+	{
+		return this.packetOutbox.size();
+	}
+	
+	public int getInboxSize()
+	{
+		return this.packetInbox.size();
 	}
 }

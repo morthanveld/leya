@@ -36,6 +36,7 @@ public class Space
 		shape.begin(ShapeType.Point);
 		shape.setColor(1, 1, 1, 1);
 		
+		/*
 		for (int i = 0; i < stars.size; i++)
 		{
 			Vector3 star = (Vector3)stars.get(i);
@@ -50,25 +51,10 @@ public class Space
 			if (star.y < ymin) star.y += 720.0f;
 			if (star.y > ymax) star.y -= 720.0f;
 			
-			//float scale = 0.02f;
-			//Vector3 vel = ship.velocity;
-			//Vector3 dir = new Vector3(vel.x * scale, vel.y * scale, vel.z * scale); 
-			/*if (dir.len() > 0.2f)
 			{
-				Vector3 s = new Vector3(star.x, star.y, star.z);
-				Vector3 d = new Vector3(star.x - dir.x, star.y - dir.y, star.z - dir.y);
-				shape.begin(ShapeType.Line);
-				shape.setColor(1, 1, 1, 1);
-				shape.line(s, d);
-				shape.end();
-			}
-			else*/
-			{
-				
 				shape.point(star.x, star.y, star.z);
-				
 			}
-		}
+		}*/
 		shape.end();
 	}
 }
