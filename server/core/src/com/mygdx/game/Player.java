@@ -25,11 +25,14 @@ public class Player
 	
 	private byte id;
 	
-	public Player(ConnectionHandler connection)
+	private StarshipServer server = null;
+	
+	public Player(StarshipServer server, ConnectionHandler connection)
 	{
 		this.id = 0;
 		this.name = new String(connection.toString());
 		this.connection = connection;
+		this.server = server;
 		
 		position = new Vector2();
 		velocity = new Vector2();
@@ -46,6 +49,12 @@ public class Player
 	
 	public void update(float dt)
 	{
+		if (connection.isDisconnected())
+		{
+			// If connection dies, unregister player at server.
+			server.unregisterPlayer(this);
+		}
+		
 		// Receive network data.
 		receivePacket();
 		

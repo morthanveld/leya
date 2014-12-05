@@ -98,6 +98,12 @@ public class StarshipServer extends ApplicationAdapter
 	
 	public void registerPlayer(ConnectionHandler connection)
 	{
-		players.add(new Player(connection));
+		players.add(new Player(this, connection));
+	}
+	
+	public void unregisterPlayer(Player p)
+	{
+		System.out.println("server: unregister player " + p.getId());
+		players.removeValue(p, false);
 	}
 }

@@ -18,6 +18,8 @@ public class ConnectionHandler implements Runnable
 	
 	private int count = 0;
 	
+	private boolean disconnected = false;
+	
 	public ConnectionHandler(Socket socket)
 	{
 		clientSocket = socket;
@@ -61,7 +63,11 @@ public class ConnectionHandler implements Runnable
 			{
 				break;
 			}
-			
+			if (disconnected)
+			{
+				break;
+			}
+					
 			synchronized (outboxLock) 
 			{
 				// Check if outbox is not empty.
@@ -76,7 +82,7 @@ public class ConnectionHandler implements Runnable
 			receivePacket();
 		}
 		
-		System.out.println("Client disconnected " + clientSocket.getRemoteAddress());
+		//System.out.println("Client disconnected " + clientSocket.getRemoteAddress());
 	}
 	
 	private void sendPacket(Packet p)
@@ -90,7 +96,8 @@ public class ConnectionHandler implements Runnable
 		} 
 		catch (IOException e) 
 		{
-			e.printStackTrace();
+			System.err.println("server: client disconnected " + clientSocket.getRemoteAddress());
+			disconnected = true;
 		}
 	}
 	
@@ -114,6 +121,7 @@ public class ConnectionHandler implements Runnable
 		{
 			// Catch if player leaves the game?
 			System.err.println("server: error reading buffer");
+			disconnected = true;
 		}
 	}
 	
@@ -125,5 +133,10 @@ public class ConnectionHandler implements Runnable
 	public int getInboxSize()
 	{
 		return this.packetInbox.size();
+	}
+	
+	public boolean isDisconnected()
+	{
+		return disconnected;
 	}
 }
