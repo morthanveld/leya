@@ -12,12 +12,14 @@ import java.util.regex.Pattern;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Net.Protocol;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.Map;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.net.Socket;
 import com.badlogic.gdx.net.SocketHints;
 
@@ -25,7 +27,7 @@ public class Game extends ApplicationAdapter
 {
 	SpriteBatch batch;
 	Texture img;
-	Ship ship;
+	ClientPlayer ship;
 	Space space;
 	
 	Socket socket;
@@ -34,32 +36,50 @@ public class Game extends ApplicationAdapter
 	
 	ConnectionHandler connectionHandler;
 	
+	ProjectileManager projectileManager = null;
+	
 	byte id = 0;
 	
-	private HashMap<Byte, Ship> ships;
+	private HashMap<Byte, ClientPlayer> ships;
+	
+	private float ioTimer = 0.0f;
+	
+	private String lastKeyboardPacket = null;
+	private String lastMousePacket = null;
 	
 	@Override
 	public void create () 
 	{
-		System.out.close();
+		//System.out.close();
 		
 		batch = new SpriteBatch();
 		img = new Texture("badlogic.jpg");
-		ship = new Ship();
+		ship = new ClientPlayer();
 		space = new Space();
 		
 		camera = new OrthographicCamera(1280, 720);
 		
-		id = (byte) (Math.random() * 100 + 1);
+		id = (byte) (int) (Math.random() * 100.0f + 1.0f);
 		
-		ships = new HashMap<Byte, Ship>();
+		ships = new HashMap<Byte, ClientPlayer>();
+		
+		projectileManager = new ProjectileManager();
+		
+		lastKeyboardPacket = new String();
+		lastMousePacket = new String();
+		
+		
+		InputMultiplexer multiplexer = new InputMultiplexer();
+		multiplexer.addProcessor(ship);
+		multiplexer.addProcessor(ship.weapon);
+		Gdx.input.setInputProcessor(multiplexer);
 		
 		// Connect to server.
 		connect();
 	}
 
 	@Override
-	public void render () 
+	public void render() 
 	{
 		updateInput();
 		
@@ -69,26 +89,46 @@ public class Game extends ApplicationAdapter
 		camera.position.set(ship.position.x, ship.position.y, 0.0f);
 		camera.update();
 			
-		float dt = Math.min(Gdx.graphics.getDeltaTime(), 1.0f / 60f);
+		float dt = Math.min(Gdx.graphics.getDeltaTime(), 1.0f / 60.0f);
 
 		space.update(dt);
 		space.render(camera, ship);
 		
 		ship.update(dt);
 		ship.render(camera);
-		
-		for(Ship player : ships.values())
+				
+		for(ClientPlayer player : ships.values())
 		{
 			player.update(dt);
 			player.render(camera);
 		}
 		
-		receivePacket();
-		sendPlayerInput();
+		// Render projectiles.
+		projectileManager.updatePhysics(dt);
+		projectileManager.render(camera);
+
+		
+		// Send output.
+		ioTimer += dt;
+		if (ioTimer > (1.0 / 10.0f))
+		{
+			updateOutput();
+			ioTimer = 0.0f;
+		}
+		
+		if (Gdx.graphics.getFrameId() % 60 == 0)
+		{
+			System.out.println("FPS: " + Gdx.graphics.getFramesPerSecond());
+		}
 	}
 	
-	public void receivePacket()
+	public void updateInput()
 	{
+		if (Gdx.input.isKeyPressed(Keys.ESCAPE))
+		{
+			Gdx.app.exit();
+		}
+		
 		Packet p = null;
 		byte[] data = null;
 		while ((p = connectionHandler.getPacket()) != null)
@@ -105,7 +145,7 @@ public class Game extends ApplicationAdapter
 				if (Byte.valueOf(list[0]) == Packet.POSITION)
 				{
 					int numPlayers = (list.length - 1)/4;
-					System.out.println("numplayers: " + numPlayers);
+					//System.out.println("numplayers: " + numPlayers);
 					
 					for (int i = 0; i < numPlayers; i++)
 					{
@@ -119,7 +159,7 @@ public class Game extends ApplicationAdapter
 						if (this.id == pid)
 						{
 							// Update position and direction.
-							System.out.println("client: update me player");
+							//System.out.println("client: update me player");
 							
 							ship.position.set(x, y, 0.0f);
 							ship.setDirection(dir);
@@ -130,19 +170,21 @@ public class Game extends ApplicationAdapter
 							if (!ships.containsKey(pid))
 							{
 								// Create new player.
-								System.out.println("client: new other player data                                   !!!!!!!!!!!!!!!!!!   " + pid);
+								//System.out.println("client: new other player data                                   !!!!!!!!!!!!!!!!!!   " + pid);
 								
-								Ship player = new Ship();
+								
+								ClientPlayer player = new ClientPlayer();
 								player.position.set(x, y, 0.0f);
 								player.setDirection(dir);
 								ships.put(pid, player);
+								
 							}
 							else
 							{
 								// Update existing player.
-								System.out.println("client: update other player");
+								//System.out.println("client: update other player");
 								
-								Ship player = ships.get(pid);
+								ClientPlayer player = ships.get(pid);
 								player.position.set(x, y, 0.0f);
 								player.setDirection(dir);
 								ships.put(pid, player);
@@ -150,19 +192,30 @@ public class Game extends ApplicationAdapter
 						}
 					}
 				}
+				if (Byte.valueOf(list[0]) == Packet.PROJECTILE)
+				{
+					int numProjectiles = (list.length - 1)/3;
+					//System.out.println("projectiles: " + numProjectiles);
+					System.out.println("projs : " + a);
+					
+					//projectileManager.clear();
+					
+					for (int i = 0; i < numProjectiles; i++)
+					{
+						int pid = Integer.valueOf(list[i * 3 + 1]).intValue();
+						float x = Float.valueOf(list[i * 3 + 2]).floatValue();
+						float y = Float.valueOf(list[i * 3 + 3]).floatValue();
+						float vx = Float.valueOf(list[i * 3 + 4]).floatValue();
+						float vy = Float.valueOf(list[i * 3 + 5]).floatValue();
+						
+						projectileManager.addProjectile(pid, x, y, vx, vy);
+					}
+				}
 			}
 			else
 			{
 				System.err.println("client: zero size packet received");
 			}
-		}
-	}
-	
-	public void updateInput()
-	{
-		if (Gdx.input.isKeyPressed(Keys.ESCAPE))
-		{
-			Gdx.app.exit();
 		}
 	}
 	
@@ -183,46 +236,55 @@ public class Game extends ApplicationAdapter
 	}
 	
 	// TODO: Must optimize this packet creater!!!
-	private void sendPlayerInput()
+	private void updateOutput()
 	{
-		if (ship.getNewInput())
+		//if (ship.getInputArraySize() > 0)
 		{
-			byte[] a = ship.getInputArray();
-			byte[] b = new byte[a.length + 2];
-			b[0] = id;
-			b[1] = 'A';
-			System.arraycopy(a, 0, b, 2, a.length);
+			StringBuffer a = new StringBuffer();
+			a.append(id);		
+			a.append(";");
+			a.append(Packet.IO_KEYBOARD);
+			
+			byte[] ia = ship.getInputArray();
+			for (int i = 0; i < ia.length; i++)
+			{
+				a.append(";");
+				a.append(ia[i]);
+			}
+			a.append("\n");
 
-			connectionHandler.addPacket(new Packet(b));
+			//if (!lastKeyboardPacket.equals(a.toString()))
+			{
+				connectionHandler.addPacket(new Packet(a.toString().getBytes()));
+				//lastKeyboardPacket = a.toString();
+			}
 		}
 	
 		
-		if (ship.weapon.getNewInput())
+		//if (ship.weapon.getInputArraySize() > 0)
 		{
-			byte[] a = ship.weapon.getInputArray();
-			byte[] b = new byte[a.length + 2];
-			b[0] = id;
-			b[1] = 'B';
-			System.arraycopy(a, 0, b, 2, a.length);
+			Vector2 pos = ship.weapon.getWorldPosition();
+			pos.add(ship.position.x, ship.position.y);
+			
+			StringBuffer a = new StringBuffer();
+			a.append(id);		
+			a.append(";");
+			a.append(Packet.IO_MOUSE);
+			
+			a.append(";");
+			a.append(pos.x);
+			a.append(";");
+			a.append(pos.y);
+			a.append(";");
+			a.append(ship.weapon.getMouseButton());
+			a.append("\n");
 
-			connectionHandler.addPacket(new Packet(b));
+			//if (!lastMousePacket.equals(a.toString()))
+			{
+				connectionHandler.addPacket(new Packet(a.toString().getBytes()));
+				//lastMousePacket = a.toString();
+			}
+			
 		}
 	}
-	
-	private float byteToFloat(byte a, byte b, byte c, byte d)
-	{
-		/*
-		int asInt = (a & 0xFF) 
-	            | ((b & 0xFF) << 8) 
-	            | ((c & 0xFF) << 16) 
-	            | ((d & 0xFF) << 24);
-		
-		return Float.intBitsToFloat(asInt);
-		*/
-		byte[] bytes = {a, b, c, d};
-		float f = ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN).getFloat();
-		return f;
-	}
-	
-	
 }

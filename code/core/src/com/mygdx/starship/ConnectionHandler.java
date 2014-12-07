@@ -102,7 +102,7 @@ public class ConnectionHandler implements Runnable
 
 				// Read data from client.
 				String d = buffer.readLine();
-				System.out.println(d);
+				//System.out.println(d);
 				packetInbox.add(new Packet(d.getBytes()));
 			}
 		} 

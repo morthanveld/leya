@@ -3,6 +3,7 @@ package com.mygdx.starship;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
@@ -10,37 +11,44 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
-public class Weapon 
+public class Weapon implements InputProcessor 
 {
-	private Ship ship;
+	private ClientPlayer ship;
 	private float timer;
 	private Vector2 target;
 	private Vector2 targetDirection;
 	private ShapeRenderer shape;
 	private float cooldown; //ms
 	
-	private Array<Projectile> projectiles;
+	//private Array<Projectile> projectiles;
 	
 	private float power;
 	private float projectileLife;
 	
-	private byte[] inputArray = null;
-	private boolean newInput = false;
+	//private byte[] inputArray = null;
+	//private boolean newInput = false;
 	
-	public Weapon(Ship s)
+	//private int inputArrayIdx = 0;
+	
+	private Vector2 worldPosition;
+	private int mouseButton = -1;
+	
+	public Weapon(ClientPlayer s)
 	{
 		ship = s;
 		target = new Vector2();
 		targetDirection = new Vector2();
 		shape = new ShapeRenderer();
-		cooldown = 0.01f;
+		cooldown = 1.0f;
 		timer = 0.0f;
 		power = 1000.0f;
 		projectileLife = 2.0f;
 		
-		projectiles = new Array<Projectile>();
+		//projectiles = new Array<Projectile>();
 		
-		inputArray = new byte[20];
+		//inputArray = new byte[20];
+		
+		worldPosition = new Vector2();
 	}
 	
 	void update(float dt)
@@ -48,10 +56,11 @@ public class Weapon
 		// Reduce cooldown timer.
 		timer = timer - dt;
 		
-		updateInput(dt);
-		updateProjectiles(dt);
+		//updateInput(dt);
+		//updateProjectiles(dt);
 	}
 	
+	/*
 	void updateProjectiles(float dt)
 	{
 		// Update projectiles.
@@ -78,60 +87,14 @@ public class Weapon
 			}
 		}
 	}
+	*/
 	
 	void updateInput(float dt)
 	{
-		// Capture mouse position.
-		target.set(Gdx.input.getX(), Gdx.input.getY());
-		targetDirection.set(target.x - 1280.0f * 0.5f, -target.y + 720.0f * 0.5f);
-		targetDirection.nor();
 		
-		// Put input in input array.
-		for (int i = 0; i < inputArray.length; i++)
-		{
-			inputArray[i] = 0;
-		}	
-		int inputArrayIdx = 0;
-		
-		if (Gdx.input.isButtonPressed(Input.Buttons.LEFT))
-		{
-			fire(dt);
-			inputArray[inputArrayIdx++] = (byte) Input.Buttons.LEFT;
-		}
-		
-		final int lastX = 0;
-		final int lastY = 0;
-		int x = Gdx.input.getX();
-		int y = Gdx.input.getY();
-		
-		if (Math.abs(lastX - x) < 1 || Math.abs(lastY - y) < 1)
-		{
-			// Update input array if mouse position differs from last frame.
-			byte[] b = floatToBytes(targetDirection.x);
-			inputArray[inputArrayIdx++] = b[0];
-			inputArray[inputArrayIdx++] = b[1];
-			inputArray[inputArrayIdx++] = b[2];
-			inputArray[inputArrayIdx++] = b[3];
-			
-			b = floatToBytes(targetDirection.y);
-			inputArray[inputArrayIdx++] = b[0];
-			inputArray[inputArrayIdx++] = b[1];
-			inputArray[inputArrayIdx++] = b[2];
-			inputArray[inputArrayIdx++] = b[3];
-		}
-		
-		if (inputArrayIdx > 0)
-		{
-			// End data if array is filled with something.
-			inputArray[inputArrayIdx++] = '\n';
-			newInput = true;
-		}
-		else
-		{
-			newInput = false;
-		}
 	}
 	
+	/*
 	void fire(float dt)
 	{
 		if (timer <= 0.0f)
@@ -150,6 +113,7 @@ public class Weapon
 			timer = cooldown;
 		}
 	}
+	*/
 	
 	void render(OrthographicCamera camera)
 	{
@@ -167,22 +131,33 @@ public class Weapon
 		// Draw projectiles.
 		shape.begin(ShapeType.Filled);
 		shape.setColor(1, 0, 0, 1);
+		/*
 		for (int i = 0; i < projectiles.size; i++)
 		{
 			Projectile p = (Projectile)projectiles.get(i);
 			shape.circle(p.position.x, p.position.y, 3.0f);
 		}
+		*/
 		shape.end();
 	}
 	
+	/*
 	public byte[] getInputArray()
 	{
 		return inputArray;
 	}
+	*/
 	
-	public boolean getNewInput()
+	/*
+	public int getInputArraySize()
 	{
-		return newInput;
+		return inputArrayIdx;
+	}
+	*/
+	
+	public Vector2 getWorldPosition()
+	{
+		return worldPosition;
 	}
 	
 	public byte[] floatToBytes(float value)
@@ -195,5 +170,67 @@ public class Weapon
 		bytes[3] = (byte)((bits >> 24) & 0xff);
 		
 		return bytes;
+	}
+
+	public int getMouseButton() {
+		return mouseButton;
+	}
+
+	public void setMouseButton(int mouseButton) {
+		this.mouseButton = mouseButton;
+	}
+
+	@Override
+	public boolean keyDown(int keycode) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean keyUp(int keycode) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean keyTyped(char character) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean touchDown(int screenX, int screenY, int pointer, int button) 
+	{
+		setMouseButton(button);
+		return true;
+	}
+
+	@Override
+	public boolean touchUp(int screenX, int screenY, int pointer, int button) 
+	{
+		setMouseButton(-1);
+		return true;
+	}
+
+	@Override
+	public boolean touchDragged(int x, int y, int pointer) 
+	{
+		target.set(x, y);
+		worldPosition.set(target.x - 1280.0f * 0.5f, -target.y + 720.0f * 0.5f);
+		return true;
+	}
+
+	@Override
+	public boolean mouseMoved(int x, int y) 
+	{
+		target.set(x, y);
+		worldPosition.set(target.x - 1280.0f * 0.5f, -target.y + 720.0f * 0.5f);
+		return true;
+	}
+
+	@Override
+	public boolean scrolled(int amount) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

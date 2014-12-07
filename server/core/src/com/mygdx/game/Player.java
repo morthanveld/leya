@@ -1,5 +1,7 @@
 package com.mygdx.game;
 
+import java.util.regex.Pattern;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.math.Quaternion;
@@ -27,6 +29,15 @@ public class Player
 	
 	private StarshipServer server = null;
 	
+	private Weapon weapon = null; 
+	
+	private static final int KEY_A = 0;
+	private static final int KEY_W = 1;
+	private static final int KEY_S = 2;
+	private static final int KEY_D = 3;
+	private static final int KEY_Q = 4;
+	private static final int KEY_E = 5;
+	
 	public Player(StarshipServer server, ConnectionHandler connection)
 	{
 		this.id = 0;
@@ -43,11 +54,13 @@ public class Player
 		angularVelocity = 0.0f;
 		angularAcceleration = 0.0f;
 			
-		drivePower = 3200.0f * 5.0f;
-		turnPower = 3000.0f * 0.1f;
+		drivePower = 3200.0f * 10.0f;
+		turnPower = 3000.0f * 0.3f;
+		
+		weapon = new Weapon(this);
 	}
 	
-	public void update(float dt)
+	public void updatePhysics(float dt)
 	{
 		if (connection.isDisconnected())
 		{
@@ -59,6 +72,7 @@ public class Player
 		receivePacket();
 		
 		// Update ship physics.
+		weapon.update(dt);
 
 		// Reduce acceleration to zero gradually.
 		acceleration.set(acceleration.x * 0.98f * dt, acceleration.y * 0.98f * dt);
@@ -75,7 +89,7 @@ public class Player
 		angularVelocity = angularAcceleration * dt;
 		direction += angularVelocity * dt;
 	
-		System.out.println(id + " | " + connection.getInboxSize() + " | " + connection.getOutboxSize());
+		//System.out.println(id + " | " + connection.getInboxSize() + " | " + connection.getOutboxSize());
 	}
 	
 	public void addPacket(Packet p)
@@ -93,25 +107,70 @@ public class Player
 			
 			if (data.length > 0)
 			{
+				String a = new String(data);
+				//System.out.println(a);
+				Pattern pattern =  Pattern.compile(";");
+				String[] list = pattern.split(a.subSequence(0, a.length()));
+				
+				byte pid = Byte.valueOf(list[0]).byteValue();
+				byte type = Byte.valueOf(list[1]).byteValue();
+								
 				if (id == 0)
 				{
-					id = data[0];
+					id = pid;
 				}
 				
-				if (data[1] == 'A')
+				if (type == Packet.IO_KEYBOARD)
 				{
 					// Keyboard input from player.
-					System.out.println("server: keyboard input from player");
+					//System.out.println("server: keyboard input from player");
 					
-					for (int k = 2; k < data.length; k++)
+					if (Byte.valueOf(list[KEY_A + 2]).byteValue() > 0)
 					{
-						handleInput(data[k]);
+						angularAcceleration += turnPower;
+					}
+					
+					if (Byte.valueOf(list[KEY_D + 2]).byteValue() > 0)
+					{
+						angularAcceleration -= turnPower;
+					}
+					
+					if (Byte.valueOf(list[KEY_W + 2]).byteValue() > 0)
+					{
+						acceleration.set(0.0f, drivePower);
+						acceleration.rotate(direction);
+					}
+					
+					if (Byte.valueOf(list[KEY_S + 2]).byteValue() > 0)
+					{
+						acceleration.set(0.0f, -drivePower);
+						acceleration.rotate(direction);
+					}
+					
+					if (Byte.valueOf(list[KEY_Q + 2]).byteValue() > 0)
+					{
+					}
+					
+					if (Byte.valueOf(list[KEY_E + 2]).byteValue() > 0)
+					{
 					}
 				}
-				else if (data[1] == 'B')
+				else if (type == Packet.IO_MOUSE)
 				{
 					// Mouse input from player.
-					System.out.println("server: mouse input from player");
+					//System.out.println("server: mouse input from player");
+					//System.out.println("server: " + new String(data));
+					
+					float x = Float.valueOf(list[2]).floatValue();
+					float y = Float.valueOf(list[3]).floatValue();
+					int button = Integer.valueOf(list[4]).intValue();
+					
+					weapon.setTarget(new Vector2(x, y));
+					if (button >= 0)
+					{
+						//System.out.println("server: fire " + button);
+						weapon.fire();
+					}
 				}
 			}
 			else
@@ -121,28 +180,6 @@ public class Player
 		}
 	}
 	
-	private void handleInput(byte key)
-	{
-		if (key == Keys.A)
-		{
-			angularAcceleration += turnPower;
-		}
-		if (key == Keys.D)
-		{
-			angularAcceleration += -turnPower;
-		}
-		if (key == Keys.W)
-		{
-			acceleration.set(0.0f, drivePower);
-			acceleration.rotate(direction);
-		}
-		if (key == Keys.S)
-		{
-			acceleration.set(0.0f, -drivePower);
-			acceleration.rotate(direction);
-		}
-	}
-
 	public Vector2 getPosition() {
 		return position;
 	}
@@ -173,5 +210,10 @@ public class Player
 
 	public byte getId() {
 		return id;
+	}
+	
+	public ProjectileManager getProjectileManager()
+	{
+		return server.projectileManager;
 	}
 }
