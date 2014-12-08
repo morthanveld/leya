@@ -36,7 +36,7 @@ public class StarshipServer extends ApplicationAdapter
 	
 	public void render()
 	{
-		float dt = Math.min(Gdx.graphics.getDeltaTime(), 1.0f / 60f);
+		float dt = 1.0f / 60.0f; //Gdx.graphics.getDeltaTime();
 		
 		updateInput();
 		updatePhysics(dt);
@@ -107,9 +107,10 @@ public class StarshipServer extends ApplicationAdapter
 		{
 			p.addPacket(positionPacket);
 			
-			System.out.println("dirty projs: " + projectileManager.getDirtySize());
-			if (projectileManager.getDataSize() > 0)
+			//System.out.println("dirty projs: " + projectileManager.getDirtySize());
+			if (projectileManager.getDataSize() > 1)
 			{
+				System.out.println("output");
 				Packet projectilePacket = new Packet(projectileManager.getProjectileData().getBytes());
 				p.addPacket(projectilePacket);
 			}

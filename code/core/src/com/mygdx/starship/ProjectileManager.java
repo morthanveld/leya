@@ -46,7 +46,7 @@ public class ProjectileManager
 			Vector2 pos = p.getPosition();
 			p.setPosition(pos.add(m));
 			
-			System.out.println("projectile-manager: " + p.getPosition() + " " + p.velocity + " " + dt);
+			//System.out.println("projectile-manager: " + p.getPosition() + " " + p.velocity + " " + dt);
 		}
 	}
 	
@@ -57,10 +57,21 @@ public class ProjectileManager
 	
 	public void addProjectile(int id, float x, float y, float vx, float vy)
 	{
-		Projectile p = new Projectile(id);
-		p.setPosition(x, y);
-		p.setVelocity(vx, vy);
-		p.setAlive(true);
-		projs.put(id, p);
+		if (projs.containsKey(id))
+		{
+			Projectile p = projs.get(id);
+			Vector2 pos = p.getPosition();
+			pos.sub(x, y);
+			System.out.println("client: projectile sync offset " + pos.len());
+			projs.remove(id);
+		}
+		else
+		{
+			Projectile p = new Projectile(id);
+			p.setPosition(x, y);
+			p.setVelocity(vx, vy);
+			p.setAlive(true);
+			projs.put(id, p);
+		}
 	}
 }

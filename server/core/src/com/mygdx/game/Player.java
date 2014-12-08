@@ -54,8 +54,8 @@ public class Player
 		angularVelocity = 0.0f;
 		angularAcceleration = 0.0f;
 			
-		drivePower = 3200.0f * 10.0f;
-		turnPower = 3000.0f * 0.3f;
+		drivePower = 3200.0f * 100.0f;
+		turnPower = 3000.0f * 0.9f;
 		
 		weapon = new Weapon(this);
 	}

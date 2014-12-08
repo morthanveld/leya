@@ -95,7 +95,7 @@ public class Game extends ApplicationAdapter
 		space.render(camera, ship);
 		
 		ship.update(dt);
-		ship.render(camera);
+		//ship.render(camera);
 				
 		for(ClientPlayer player : ships.values())
 		{
@@ -195,8 +195,11 @@ public class Game extends ApplicationAdapter
 				if (Byte.valueOf(list[0]) == Packet.PROJECTILE)
 				{
 					int numProjectiles = (list.length - 1)/3;
-					//System.out.println("projectiles: " + numProjectiles);
-					System.out.println("projs : " + a);
+					System.out.println("projectiles: " + numProjectiles + " " + a);
+					if (numProjectiles > 0)
+					{
+						System.out.println("projs : " + a);
+					}
 					
 					//projectileManager.clear();
 					
@@ -278,6 +281,8 @@ public class Game extends ApplicationAdapter
 			a.append(";");
 			a.append(ship.weapon.getMouseButton());
 			a.append("\n");
+			
+			System.out.println("mouse " + a.toString());
 
 			//if (!lastMousePacket.equals(a.toString()))
 			{

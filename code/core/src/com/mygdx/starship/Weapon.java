@@ -199,15 +199,19 @@ public class Weapon implements InputProcessor
 	}
 
 	@Override
-	public boolean touchDown(int screenX, int screenY, int pointer, int button) 
+	public boolean touchDown(int x, int y, int pointer, int button) 
 	{
+		target.set(x, y);
+		worldPosition.set(target.x - 1280.0f * 0.5f, -target.y + 720.0f * 0.5f);
 		setMouseButton(button);
 		return true;
 	}
 
 	@Override
-	public boolean touchUp(int screenX, int screenY, int pointer, int button) 
+	public boolean touchUp(int x, int y, int pointer, int button) 
 	{
+		target.set(x, y);
+		worldPosition.set(target.x - 1280.0f * 0.5f, -target.y + 720.0f * 0.5f);
 		setMouseButton(-1);
 		return true;
 	}

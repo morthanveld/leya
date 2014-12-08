@@ -47,7 +47,7 @@ public class ProjectileManager
 			
 			i++;
 					
-			System.out.println("projectile-manager: " + p.position);
+			//System.out.println("projectile-manager: " + p.position);
 		}
 	}
 	
