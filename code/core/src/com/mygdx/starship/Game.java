@@ -51,15 +51,19 @@ public class Game extends ApplicationAdapter
 	public void create () 
 	{
 		//System.out.close();
+		id = (byte) (int) (Math.random() * 100.0f + 1.0f);
+		
+		// Connect to server.
+		connect();
 		
 		batch = new SpriteBatch();
 		img = new Texture("badlogic.jpg");
-		ship = new ClientPlayer();
+		ship = new ClientPlayer(id, connectionHandler);
 		space = new Space();
 		
 		camera = new OrthographicCamera(1280, 720);
 		
-		id = (byte) (int) (Math.random() * 100.0f + 1.0f);
+		
 		
 		ships = new HashMap<Byte, ClientPlayer>();
 		
@@ -71,11 +75,10 @@ public class Game extends ApplicationAdapter
 		
 		InputMultiplexer multiplexer = new InputMultiplexer();
 		multiplexer.addProcessor(ship);
-		multiplexer.addProcessor(ship.weapon);
+		//multiplexer.addProcessor(ship.weapon);
 		Gdx.input.setInputProcessor(multiplexer);
 		
-		// Connect to server.
-		connect();
+		
 	}
 
 	@Override
@@ -95,7 +98,7 @@ public class Game extends ApplicationAdapter
 		space.render(camera, ship);
 		
 		ship.update(dt);
-		//ship.render(camera);
+		ship.render(camera);
 				
 		for(ClientPlayer player : ships.values())
 		{
@@ -173,7 +176,7 @@ public class Game extends ApplicationAdapter
 								//System.out.println("client: new other player data                                   !!!!!!!!!!!!!!!!!!   " + pid);
 								
 								
-								ClientPlayer player = new ClientPlayer();
+								ClientPlayer player = new ClientPlayer(pid, null);
 								player.position.set(x, y, 0.0f);
 								player.setDirection(dir);
 								ships.put(pid, player);
@@ -194,22 +197,27 @@ public class Game extends ApplicationAdapter
 				}
 				if (Byte.valueOf(list[0]) == Packet.PROJECTILE)
 				{
-					int numProjectiles = (list.length - 1)/3;
+					int numProjectiles = (list.length - 1)/5;
+					
+					/*
 					System.out.println("projectiles: " + numProjectiles + " " + a);
 					if (numProjectiles > 0)
 					{
 						System.out.println("projs : " + a);
 					}
+					*/
 					
 					//projectileManager.clear();
 					
+					System.out.println("client: projectile fire");
+					
 					for (int i = 0; i < numProjectiles; i++)
 					{
-						int pid = Integer.valueOf(list[i * 3 + 1]).intValue();
-						float x = Float.valueOf(list[i * 3 + 2]).floatValue();
-						float y = Float.valueOf(list[i * 3 + 3]).floatValue();
-						float vx = Float.valueOf(list[i * 3 + 4]).floatValue();
-						float vy = Float.valueOf(list[i * 3 + 5]).floatValue();
+						int pid = Integer.valueOf(list[i * 5 + 1]).intValue();
+						float x = Float.valueOf(list[i * 5 + 2]).floatValue();
+						float y = Float.valueOf(list[i * 5 + 3]).floatValue();
+						float vx = Float.valueOf(list[i * 5 + 4]).floatValue();
+						float vy = Float.valueOf(list[i * 5 + 5]).floatValue();
 						
 						projectileManager.addProjectile(pid, x, y, vx, vy);
 					}
@@ -266,6 +274,7 @@ public class Game extends ApplicationAdapter
 		
 		//if (ship.weapon.getInputArraySize() > 0)
 		{
+			/*
 			Vector2 pos = ship.weapon.getWorldPosition();
 			pos.add(ship.position.x, ship.position.y);
 			
@@ -282,13 +291,14 @@ public class Game extends ApplicationAdapter
 			a.append(ship.weapon.getMouseButton());
 			a.append("\n");
 			
-			System.out.println("mouse " + a.toString());
+			//System.out.println("mouse " + a.toString());
 
-			//if (!lastMousePacket.equals(a.toString()))
+			if (!lastMousePacket.equals(a.toString()))
 			{
 				connectionHandler.addPacket(new Packet(a.toString().getBytes()));
 				//lastMousePacket = a.toString();
 			}
+			*/
 			
 		}
 	}

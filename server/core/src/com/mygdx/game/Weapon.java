@@ -26,9 +26,9 @@ public class Weapon
 		target = new Vector2();
 		//targetDirection = new Vector2();
 		//shape = new ShapeRenderer();
-		cooldown = 1.0f;
+		cooldown = 0.2f;
 		timer = 0.0f;
-		power = 100.0f;
+		power = 100.0f * 2.0f;
 		projectileLife = 5.0f;
 		
 		//projectiles = new Array<Projectile>();
@@ -78,6 +78,8 @@ public class Weapon
 			// Calculate direction.
 			Vector2 dir = target.sub(player.getPosition());
 			dir.nor();
+			dir.scl(power);
+			dir.add(player.getVelocity());
 			
 			/*
 			// Create new projectile.
@@ -91,7 +93,7 @@ public class Weapon
 			
 			//projectiles.add(p);
 			
-			player.getProjectileManager().create(player.getPosition(), dir.scl(power), projectileLife);
+			player.getProjectileManager().create(player.getPosition(), dir, projectileLife);
 
 			// Reset weapon cooldown.
 			timer = cooldown;
@@ -102,5 +104,15 @@ public class Weapon
 	public void setTarget(Vector2 target)
 	{
 		this.target = target;
+	}
+	
+	public void setTarget(float x, float y)
+	{
+		this.target.set(x, y);
+	}
+	
+	public Vector2 getTarget()
+	{
+		return this.target;
 	}
 }

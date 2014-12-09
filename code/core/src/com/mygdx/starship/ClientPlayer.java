@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
 public class ClientPlayer implements InputProcessor
@@ -33,8 +34,16 @@ public class ClientPlayer implements InputProcessor
 	private static final int KEY_Q = 4;
 	private static final int KEY_E = 5;
 	
-	public ClientPlayer()
+	private ConnectionHandler connectionHandler = null;
+	private int id = 0;
+	
+	private boolean mouseButtonDown = false;
+	
+	public ClientPlayer(int id, ConnectionHandler connection)
 	{
+		this.id = id;
+		connectionHandler = connection;
+		
 		batch = new SpriteBatch();
 		img = new Texture("fighter.png");
 		
@@ -63,6 +72,11 @@ public class ClientPlayer implements InputProcessor
 		
 		// Update weapon.
 		weapon.update(dt);
+		
+		if (mouseButtonDown)
+		{
+			createOutputPacket();
+		}
 	}
 	
 	public void updateInput()
@@ -210,6 +224,29 @@ public class ClientPlayer implements InputProcessor
 		}
 		return false;
 	}
+	
+	private void createOutputPacket()
+	{
+		Vector2 pos = new Vector2(weapon.getWorldPosition());
+		pos.add(position.x, position.y);
+		
+		StringBuffer a = new StringBuffer();
+		a.append(this.id);		
+		a.append(";");
+		a.append(Packet.IO_MOUSE);
+		
+		a.append(";");
+		a.append(pos.x);
+		a.append(";");
+		a.append(pos.y);
+		a.append(";");
+		a.append(weapon.getMouseButton());
+		a.append("\n");
+		
+		//System.out.println("mouse " + a.toString());
+
+		connectionHandler.addPacket(new Packet(a.toString().getBytes()));
+	}
 
 	@Override
 	public boolean keyTyped(char character) 
@@ -219,27 +256,41 @@ public class ClientPlayer implements InputProcessor
 	}
 
 	@Override
-	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean touchDown(int x, int y, int pointer, int button) 
+	{
+		weapon.setTarget(x, y);
+		weapon.setWorldPosition(x - 1280.0f * 0.5f, -y + 720.0f * 0.5f);
+		weapon.setMouseButton(button);
+		createOutputPacket();
+		mouseButtonDown = true;
+		return true;
 	}
 
 	@Override
-	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean touchUp(int x, int y, int pointer, int button) 
+	{
+		weapon.setTarget(x, y);
+		weapon.setWorldPosition(x - 1280.0f * 0.5f, -y + 720.0f * 0.5f);
+		weapon.setMouseButton(-1);
+		createOutputPacket();
+		mouseButtonDown = false;
+		return true;
 	}
 
 	@Override
-	public boolean touchDragged(int screenX, int screenY, int pointer) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean touchDragged(int x, int y, int pointer) {
+		weapon.setTarget(x, y);
+		weapon.setWorldPosition(x - 1280.0f * 0.5f, -y + 720.0f * 0.5f);
+		createOutputPacket();
+		return true;
 	}
 
 	@Override
-	public boolean mouseMoved(int screenX, int screenY) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean mouseMoved(int x, int y) {
+		weapon.setTarget(x, y);
+		weapon.setWorldPosition(x - 1280.0f * 0.5f, -y + 720.0f * 0.5f);
+		createOutputPacket();
+		return true;
 	}
 
 	@Override

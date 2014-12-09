@@ -15,8 +15,8 @@ public class DesktopLauncher {
 		config.fullscreen = false;
 		config.forceExit = true;  
 		config.vSyncEnabled = false;
-		config.foregroundFPS = 60;
-		config.backgroundFPS = 60;
+		config.foregroundFPS = 120;
+		config.backgroundFPS = 120;
 		new LwjglApplication(new StarshipServer(), config);
 	}
 }

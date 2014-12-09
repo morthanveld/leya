@@ -11,7 +11,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
-public class Weapon implements InputProcessor 
+public class Weapon// implements InputProcessor 
 {
 	private ClientPlayer ship;
 	private float timer;
@@ -160,18 +160,6 @@ public class Weapon implements InputProcessor
 		return worldPosition;
 	}
 	
-	public byte[] floatToBytes(float value)
-	{
-		int bits = Float.floatToIntBits(value);
-		byte[] bytes = new byte[4];
-		bytes[0] = (byte)(bits & 0xff);
-		bytes[1] = (byte)((bits >> 8) & 0xff);
-		bytes[2] = (byte)((bits >> 16) & 0xff);
-		bytes[3] = (byte)((bits >> 24) & 0xff);
-		
-		return bytes;
-	}
-
 	public int getMouseButton() {
 		return mouseButton;
 	}
@@ -180,6 +168,7 @@ public class Weapon implements InputProcessor
 		this.mouseButton = mouseButton;
 	}
 
+	/*
 	@Override
 	public boolean keyDown(int keycode) {
 		// TODO Auto-generated method stub
@@ -236,5 +225,36 @@ public class Weapon implements InputProcessor
 	public boolean scrolled(int amount) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+	*/
+
+	public Vector2 getTarget() {
+		return target;
+	}
+
+	public void setTarget(Vector2 target) {
+		this.target = target;
+	}
+
+	public Vector2 getTargetDirection() {
+		return targetDirection;
+	}
+
+	public void setTargetDirection(Vector2 targetDirection) {
+		this.targetDirection = targetDirection;
+	}
+	
+	public void setTarget(float x, float y)
+	{
+		this.target.set(x, y);
+	}
+
+	public void setWorldPosition(Vector2 worldPosition) {
+		this.worldPosition = worldPosition;
+	}
+	
+	public void setWorldPosition(float x, float y)
+	{
+		this.worldPosition.set(x, y);
 	}
 }

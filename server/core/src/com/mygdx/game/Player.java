@@ -54,8 +54,8 @@ public class Player
 		angularVelocity = 0.0f;
 		angularAcceleration = 0.0f;
 			
-		drivePower = 3200.0f * 100.0f;
-		turnPower = 3000.0f * 0.9f;
+		drivePower = 3200.0f * 0.05f;
+		turnPower = 3000.0f * 0.03f;
 		
 		weapon = new Weapon(this);
 	}
@@ -75,9 +75,11 @@ public class Player
 		weapon.update(dt);
 
 		// Reduce acceleration to zero gradually.
-		acceleration.set(acceleration.x * 0.98f * dt, acceleration.y * 0.98f * dt);
+		//Vector2 dampening = new Vector2(acceleration.nor());
+		//dampening.scl(-0.02f * dt);
+		Vector2 a = new Vector2(acceleration);
 
-		velocity.mulAdd(acceleration, dt);
+		velocity.mulAdd(a, dt);
 
 		// Put some viscosity in space. Velocity in opposite direction.
 		velocity.mulAdd(velocity, -0.25f * dt);
@@ -85,8 +87,9 @@ public class Player
 		position.mulAdd(velocity, dt);
 		orientation.setFromAxis(0.0f, 0.0f, 1.0f, direction);
 
-		angularAcceleration *= 0.98f;
-		angularVelocity = angularAcceleration * dt;
+		//angularAcceleration *= 0.98f;
+		angularVelocity += angularAcceleration * dt;
+		angularVelocity -= angularVelocity * 0.5f * dt;
 		direction += angularVelocity * dt;
 	
 		//System.out.println(id + " | " + connection.getInboxSize() + " | " + connection.getOutboxSize());
@@ -125,32 +128,30 @@ public class Player
 					// Keyboard input from player.
 					//System.out.println("server: keyboard input from player");
 					
+					acceleration.set(0.0f, 0.0f);
+					angularAcceleration = 0.0f;
+					
 					if (Byte.valueOf(list[KEY_A + 2]).byteValue() > 0)
 					{
-						angularAcceleration += turnPower;
+						angularAcceleration = turnPower;
 					}
-					
 					if (Byte.valueOf(list[KEY_D + 2]).byteValue() > 0)
 					{
-						angularAcceleration -= turnPower;
+						angularAcceleration = -turnPower;
 					}
-					
 					if (Byte.valueOf(list[KEY_W + 2]).byteValue() > 0)
 					{
 						acceleration.set(0.0f, drivePower);
 						acceleration.rotate(direction);
 					}
-					
 					if (Byte.valueOf(list[KEY_S + 2]).byteValue() > 0)
 					{
 						acceleration.set(0.0f, -drivePower);
 						acceleration.rotate(direction);
 					}
-					
 					if (Byte.valueOf(list[KEY_Q + 2]).byteValue() > 0)
 					{
 					}
-					
 					if (Byte.valueOf(list[KEY_E + 2]).byteValue() > 0)
 					{
 					}

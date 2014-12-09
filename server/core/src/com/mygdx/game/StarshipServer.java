@@ -36,7 +36,8 @@ public class StarshipServer extends ApplicationAdapter
 	
 	public void render()
 	{
-		float dt = 1.0f / 60.0f; //Gdx.graphics.getDeltaTime();
+		//float dt = 1.0f / 60.0f;
+		float dt = Gdx.graphics.getDeltaTime();
 		
 		updateInput();
 		updatePhysics(dt);
@@ -50,7 +51,7 @@ public class StarshipServer extends ApplicationAdapter
 		
 		if (Gdx.graphics.getFrameId() % 60 == 0)
 		{
-			System.out.println("FPS: " + Gdx.graphics.getFramesPerSecond());
+			System.out.println("FPS: " + Gdx.graphics.getFramesPerSecond() + " " + Gdx.graphics.getDeltaTime());
 		}
 		/*
 		try 
@@ -108,9 +109,10 @@ public class StarshipServer extends ApplicationAdapter
 			p.addPacket(positionPacket);
 			
 			//System.out.println("dirty projs: " + projectileManager.getDirtySize());
+			
 			if (projectileManager.getDataSize() > 1)
 			{
-				System.out.println("output");
+				//System.err.println("output");
 				Packet projectilePacket = new Packet(projectileManager.getProjectileData().getBytes());
 				p.addPacket(projectilePacket);
 			}

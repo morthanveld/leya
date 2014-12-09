@@ -13,7 +13,7 @@ public class Packet
 	
 	public Packet(byte[] data)
 	{
-		this.data = data;  
+		this.data = data.clone();
 	}
 	
 	public byte[] getData()
