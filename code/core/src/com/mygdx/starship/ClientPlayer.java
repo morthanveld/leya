@@ -54,7 +54,7 @@ public class ClientPlayer implements InputProcessor
 		orientation = new Quaternion();
 		direction = 0.0f;
 		
-		scale = new Vector3(1.0f, 1.0f, 1.0f);
+		scale = new Vector3(0.5f, 0.5f, 0.5f);
 		
 		inputArray = new byte[6];
 		for (int i = 0; i < inputArray.length; i++)

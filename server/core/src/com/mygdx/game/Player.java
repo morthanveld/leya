@@ -54,7 +54,7 @@ public class Player
 		angularVelocity = 0.0f;
 		angularAcceleration = 0.0f;
 			
-		drivePower = 3200.0f * 0.05f;
+		drivePower = 3200.0f * 0.1f;
 		turnPower = 3000.0f * 0.03f;
 		
 		weapon = new Weapon(this);
@@ -215,6 +215,6 @@ public class Player
 	
 	public ProjectileManager getProjectileManager()
 	{
-		return server.projectileManager;
+		return server.getProjectileManager();
 	}
 }

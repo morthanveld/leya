@@ -80,7 +80,20 @@ public class ConnectionHandler implements Runnable
 			
 			// Receive packets.
 			receivePacket();
+			
+			
+			try 
+			{
+				// Reduce CPU time.
+				Thread.sleep(1);
+			} 
+			catch (InterruptedException e) 
+			{
+				e.printStackTrace();
+			}
 		}
+		
+		
 		
 		//System.out.println("Client disconnected " + clientSocket.getRemoteAddress());
 	}
@@ -107,6 +120,7 @@ public class ConnectionHandler implements Runnable
 		{
 			if (clientSocket.getInputStream().available() > 0)
 			{
+				// TODO: Create the buffer once instead of every read??!!
 				BufferedReader buffer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream())); 
 
 				synchronized (inboxLock) 
@@ -127,12 +141,18 @@ public class ConnectionHandler implements Runnable
 	
 	public int getOutboxSize()
 	{
-		return this.packetOutbox.size();
+		synchronized (outboxLock)
+		{
+			return this.packetOutbox.size();
+		}
 	}
 	
 	public int getInboxSize()
 	{
-		return this.packetInbox.size();
+		synchronized (inboxLock) 
+		{
+			return this.packetInbox.size();
+		}
 	}
 	
 	public boolean isDisconnected()

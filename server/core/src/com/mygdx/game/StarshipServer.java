@@ -16,8 +16,8 @@ import com.badlogic.gdx.utils.Array;
 
 public class StarshipServer extends ApplicationAdapter 
 {
-	Array<Player> players;
-	ProjectileManager projectileManager;
+	private Array<Player> players;
+	private ProjectileManager projectileManager;
 	
 	float ioTimer = 0.0f;
 	
@@ -112,8 +112,8 @@ public class StarshipServer extends ApplicationAdapter
 			
 			if (projectileManager.getDataSize() > 1)
 			{
-				//System.err.println("output");
-				Packet projectilePacket = new Packet(projectileManager.getProjectileData().getBytes());
+				String projectileData = projectileManager.getProjectileData();
+				Packet projectilePacket = new Packet(projectileData.getBytes());
 				p.addPacket(projectilePacket);
 			}
 		}
@@ -142,5 +142,9 @@ public class StarshipServer extends ApplicationAdapter
 	{
 		System.out.println("server: unregister player " + p.getId());
 		players.removeValue(p, false);
+	}
+
+	public ProjectileManager getProjectileManager() {
+		return projectileManager;
 	}
 }

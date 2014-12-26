@@ -113,7 +113,7 @@ public class Game extends ApplicationAdapter
 		
 		// Send output.
 		ioTimer += dt;
-		if (ioTimer > (1.0 / 10.0f))
+		if (ioTimer > (1.0 / 60.0f))
 		{
 			updateOutput();
 			ioTimer = 0.0f;
@@ -199,8 +199,10 @@ public class Game extends ApplicationAdapter
 				{
 					int numProjectiles = (list.length - 1)/5;
 					
+					//System.err.println(a);
+					
+					//System.out.println("projectiles: " + numProjectiles + " " + a);
 					/*
-					System.out.println("projectiles: " + numProjectiles + " " + a);
 					if (numProjectiles > 0)
 					{
 						System.out.println("projs : " + a);
@@ -209,7 +211,7 @@ public class Game extends ApplicationAdapter
 					
 					//projectileManager.clear();
 					
-					System.out.println("client: projectile fire");
+					//System.out.println("client: projectile fire");
 					
 					for (int i = 0; i < numProjectiles; i++)
 					{

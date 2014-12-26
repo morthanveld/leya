@@ -26,10 +26,10 @@ public class Weapon
 		target = new Vector2();
 		//targetDirection = new Vector2();
 		//shape = new ShapeRenderer();
-		cooldown = 0.2f;
+		cooldown = 0.5f;
 		timer = 0.0f;
-		power = 100.0f * 2.0f;
-		projectileLife = 5.0f;
+		power = 100.0f * 10.0f;
+		projectileLife = 3.0f;
 		
 		//projectiles = new Array<Projectile>();
 	}
@@ -89,7 +89,7 @@ public class Weapon
 			p.life = projectileLife;
 			*/
 			
-			System.out.println("New Projectile - Power: " + power + " Life: " + projectileLife);
+			//System.out.println("New Projectile - Power: " + power + " Life: " + projectileLife);
 			
 			//projectiles.add(p);
 			
