@@ -1,31 +1,14 @@
 package com.mygdx.starship;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Quaternion;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 
-public class ClientPlayer implements InputProcessor
+public class ClientInput implements InputProcessor
 {
-	public Vector3 position;
-	private Quaternion orientation;
-	private float direction;	
-	private Vector3 scale;
-	
-	SpriteBatch batch;
-	Texture img;
-	
-	public Weapon weapon;
-	
 	private byte[] inputArray = null;
-	
 	private int inputArrayIdx = 0;
+	
 	
 	private static final int KEY_A = 0;
 	private static final int KEY_W = 1;
@@ -34,27 +17,14 @@ public class ClientPlayer implements InputProcessor
 	private static final int KEY_Q = 4;
 	private static final int KEY_E = 5;
 	
-	private ConnectionHandler connectionHandler = null;
-	private int id = 0;
-	
+	private ClientShip clientShip = null;
 	private boolean mouseButtonDown = false;
 	
-	public ClientPlayer(int id, ConnectionHandler connection)
+	private int id = 0;
+	
+	public ClientInput(ClientShip clientShip)
 	{
-		this.id = id;
-		connectionHandler = connection;
-		
-		batch = new SpriteBatch();
-		img = new Texture("fighter.png");
-		
-		weapon = new Weapon(this);
-		
-		position = new Vector3();
-		
-		orientation = new Quaternion();
-		direction = 0.0f;
-		
-		scale = new Vector3(0.5f, 0.5f, 0.5f);
+		this.clientShip = clientShip;
 		
 		inputArray = new byte[6];
 		for (int i = 0; i < inputArray.length; i++)
@@ -63,68 +33,13 @@ public class ClientPlayer implements InputProcessor
 		}	
 	}
 	
-	public void update(float dt)
-	{
-		// Handle input.
-		//updateInput();
-				
-		orientation.setFromAxis(0.0f, 0.0f, 1.0f, direction);
-		
-		// Update weapon.
-		weapon.update(dt);
-		
-		if (mouseButtonDown)
-		{
-			createOutputPacket();
-		}
-	}
-	
 	public void updateInput()
 	{
-		/*
-		for (int i = 0; i < inputArray.length; i++)
+		if (mouseButtonDown)
 		{
-			inputArray[i] = 0;
-		}	
-		inputArrayIdx = 0;
-			
-		if (Gdx.input.isKeyPressed(Keys.A))
-		{
-			inputArray[inputArrayIdx++] = (byte) Keys.A;
+			// Create packet every frame mouse button is down.
+			createOutputPacket();
 		}
-		if (Gdx.input.isKeyPressed(Keys.D))
-		{
-			inputArray[inputArrayIdx++] = (byte) Keys.D;
-		}
-		if (Gdx.input.isKeyPressed(Keys.W))
-		{
-			inputArray[inputArrayIdx++] = (byte) Keys.W;
-		}
-		if (Gdx.input.isKeyPressed(Keys.S))
-		{
-			inputArray[inputArrayIdx++] = (byte) Keys.S;
-		}
-		
-		if (inputArrayIdx > 0)
-		{
-			// End data if array is filled with something.
-			inputArray[inputArrayIdx++] = '\n';
-		}*/
-	}
-	
-	public void render(OrthographicCamera camera)
-	{
-		// Set transformation.
-		Matrix4 transform = new Matrix4(position, orientation, scale);
-		batch.setTransformMatrix(transform);
-
-		batch.setProjectionMatrix(camera.combined);
-		batch.begin();
-		batch.draw(img, -img.getWidth() * 0.5f, -img.getHeight() * 0.5f);
-		batch.end();
-		
-		// Render weapon.
-		//weapon.render(camera);
 	}
 	
 	public byte[] getInputArray()
@@ -137,17 +52,11 @@ public class ClientPlayer implements InputProcessor
 		return inputArrayIdx;
 	}
 	
-	public void setPosition(float x, float y)
+	public boolean isMouseButtonDown()
 	{
-		position.set(x, y, position.z);
+		return this.mouseButtonDown;
 	}
 	
-	public void setDirection(float d)
-	{
-		direction = d;
-	}
-
-	@Override
 	public boolean keyDown(int keycode) 
 	{
 		switch (keycode)
@@ -227,8 +136,9 @@ public class ClientPlayer implements InputProcessor
 	
 	private void createOutputPacket()
 	{
-		Vector2 pos = new Vector2(weapon.getWorldPosition());
-		pos.add(position.x, position.y);
+		Weapon w = clientShip.getWeapon();
+		Vector2 pos = w.getWorldPosition();
+		pos.add(clientShip.getPosition());
 		
 		StringBuffer a = new StringBuffer();
 		a.append(this.id);		
@@ -240,12 +150,12 @@ public class ClientPlayer implements InputProcessor
 		a.append(";");
 		a.append(pos.y);
 		a.append(";");
-		a.append(weapon.getMouseButton());
+		a.append(w.getMouseButton());
 		a.append("\n");
 		
 		//System.out.println("mouse " + a.toString());
 
-		connectionHandler.addPacket(new Packet(a.toString().getBytes()));
+		clientShip.getConnectionHandler().addPacket(new Packet(a.toString().getBytes()));
 	}
 
 	@Override
@@ -258,6 +168,7 @@ public class ClientPlayer implements InputProcessor
 	@Override
 	public boolean touchDown(int x, int y, int pointer, int button) 
 	{
+		Weapon weapon = clientShip.getWeapon();
 		weapon.setTarget(x, y);
 		weapon.setWorldPosition(x - 1280.0f * 0.5f, -y + 720.0f * 0.5f);
 		weapon.setMouseButton(button);
@@ -269,6 +180,7 @@ public class ClientPlayer implements InputProcessor
 	@Override
 	public boolean touchUp(int x, int y, int pointer, int button) 
 	{
+		Weapon weapon = clientShip.getWeapon();
 		weapon.setTarget(x, y);
 		weapon.setWorldPosition(x - 1280.0f * 0.5f, -y + 720.0f * 0.5f);
 		weapon.setMouseButton(-1);
@@ -278,7 +190,9 @@ public class ClientPlayer implements InputProcessor
 	}
 
 	@Override
-	public boolean touchDragged(int x, int y, int pointer) {
+	public boolean touchDragged(int x, int y, int pointer) 
+	{
+		Weapon weapon = clientShip.getWeapon();
 		weapon.setTarget(x, y);
 		weapon.setWorldPosition(x - 1280.0f * 0.5f, -y + 720.0f * 0.5f);
 		createOutputPacket();
@@ -286,7 +200,9 @@ public class ClientPlayer implements InputProcessor
 	}
 
 	@Override
-	public boolean mouseMoved(int x, int y) {
+	public boolean mouseMoved(int x, int y) 
+	{
+		Weapon weapon = clientShip.getWeapon();
 		weapon.setTarget(x, y);
 		weapon.setWorldPosition(x - 1280.0f * 0.5f, -y + 720.0f * 0.5f);
 		createOutputPacket();
@@ -294,7 +210,8 @@ public class ClientPlayer implements InputProcessor
 	}
 
 	@Override
-	public boolean scrolled(int amount) {
+	public boolean scrolled(int amount) 
+	{
 		// TODO Auto-generated method stub
 		return false;
 	}

@@ -88,15 +88,18 @@ public class StarshipServer extends ApplicationAdapter
 		
 		for (Player p : players)
 		{
-			// Compile data to send.
-			a.append(";");
-			a.append(p.getId());
-			a.append(";");
-			a.append(p.getPosition().x);
-			a.append(";");
-			a.append(p.getPosition().y);
-			a.append(";");
-			a.append(p.getDirection());
+			if (p.getId() != 0)
+			{
+				// Compile data to send.
+				a.append(";");
+				a.append(p.getId());
+				a.append(";");
+				a.append(p.getPosition().x);
+				a.append(";");
+				a.append(p.getPosition().y);
+				a.append(";");
+				a.append(p.getDirection());
+			}
 		}
 		
 		a.append("\n");

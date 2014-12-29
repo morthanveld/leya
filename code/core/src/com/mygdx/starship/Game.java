@@ -27,7 +27,7 @@ public class Game extends ApplicationAdapter
 {
 	SpriteBatch batch;
 	Texture img;
-	ClientPlayer ship;
+	ClientShip ship;
 	Space space;
 	
 	Socket socket;
@@ -40,12 +40,14 @@ public class Game extends ApplicationAdapter
 	
 	byte id = 0;
 	
-	private HashMap<Byte, ClientPlayer> ships;
+	private HashMap<Byte, ClientShip> ships;
 	
 	private float ioTimer = 0.0f;
 	
 	private String lastKeyboardPacket = null;
 	private String lastMousePacket = null;
+	
+	private ClientInput clientInput = null;
 	
 	@Override
 	public void create () 
@@ -58,14 +60,14 @@ public class Game extends ApplicationAdapter
 		
 		batch = new SpriteBatch();
 		img = new Texture("badlogic.jpg");
-		ship = new ClientPlayer(id, connectionHandler);
+		ship = new ClientShip(id, connectionHandler);
 		space = new Space();
 		
 		camera = new OrthographicCamera(1280, 720);
 		
 		
 		
-		ships = new HashMap<Byte, ClientPlayer>();
+		ships = new HashMap<Byte, ClientShip>();
 		
 		projectileManager = new ProjectileManager();
 		
@@ -73,12 +75,12 @@ public class Game extends ApplicationAdapter
 		lastMousePacket = new String();
 		
 		
+		/*
 		InputMultiplexer multiplexer = new InputMultiplexer();
-		multiplexer.addProcessor(ship);
+		multiplexer.addProcessor(ship);*/
 		//multiplexer.addProcessor(ship.weapon);
-		Gdx.input.setInputProcessor(multiplexer);
-		
-		
+		clientInput = new ClientInput(ship);
+		Gdx.input.setInputProcessor(clientInput);
 	}
 
 	@Override
@@ -88,8 +90,8 @@ public class Game extends ApplicationAdapter
 		
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		
-		camera.position.set(ship.position.x, ship.position.y, 0.0f);
+
+		camera.position.set(ship.getPosition(), 0.0f);
 		camera.update();
 			
 		float dt = Math.min(Gdx.graphics.getDeltaTime(), 1.0f / 60.0f);
@@ -100,7 +102,7 @@ public class Game extends ApplicationAdapter
 		ship.update(dt);
 		ship.render(camera);
 				
-		for(ClientPlayer player : ships.values())
+		for(ClientShip player : ships.values())
 		{
 			player.update(dt);
 			player.render(camera);
@@ -132,6 +134,10 @@ public class Game extends ApplicationAdapter
 			Gdx.app.exit();
 		}
 		
+		// Update client input.
+		clientInput.updateInput();
+		
+		// Read input from connection.
 		Packet p = null;
 		byte[] data = null;
 		while ((p = connectionHandler.getPacket()) != null)
@@ -157,14 +163,15 @@ public class Game extends ApplicationAdapter
 						float x = Float.valueOf(list[i * 4 + 2]).floatValue();
 						float y = Float.valueOf(list[i * 4 + 3]).floatValue();
 						float dir = Float.valueOf(list[i * 4 + 4]).floatValue();
-						
+											
 						// Check if data from server is intended for me.
 						if (this.id == pid)
 						{
 							// Update position and direction.
 							//System.out.println("client: update me player");
 							
-							ship.position.set(x, y, 0.0f);
+							//ship.position.set(x, y, 0.0f);
+							ship.setPosition(x, y);
 							ship.setDirection(dir);
 						}
 						else
@@ -173,11 +180,11 @@ public class Game extends ApplicationAdapter
 							if (!ships.containsKey(pid))
 							{
 								// Create new player.
-								//System.out.println("client: new other player data                                   !!!!!!!!!!!!!!!!!!   " + pid);
+								System.out.println("client: new other player data                                   !!!!!!!!!!!!!!!!!!   " + pid + "\t" + this.id);
 								
 								
-								ClientPlayer player = new ClientPlayer(pid, null);
-								player.position.set(x, y, 0.0f);
+								ClientShip player = new ClientShip(pid, null);
+								player.setPosition(x, y);
 								player.setDirection(dir);
 								ships.put(pid, player);
 								
@@ -187,8 +194,8 @@ public class Game extends ApplicationAdapter
 								// Update existing player.
 								//System.out.println("client: update other player");
 								
-								ClientPlayer player = ships.get(pid);
-								player.position.set(x, y, 0.0f);
+								ClientShip player = ships.get(pid);
+								player.setPosition(x, y);
 								player.setDirection(dir);
 								ships.put(pid, player);
 							}
@@ -258,7 +265,7 @@ public class Game extends ApplicationAdapter
 			a.append(";");
 			a.append(Packet.IO_KEYBOARD);
 			
-			byte[] ia = ship.getInputArray();
+			byte[] ia = clientInput.getInputArray();
 			for (int i = 0; i < ia.length; i++)
 			{
 				a.append(";");

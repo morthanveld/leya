@@ -13,7 +13,7 @@ import com.badlogic.gdx.utils.Array;
 
 public class Weapon// implements InputProcessor 
 {
-	private ClientPlayer ship;
+	private ClientShip ship;
 	private float timer;
 	private Vector2 target;
 	private Vector2 targetDirection;
@@ -33,7 +33,7 @@ public class Weapon// implements InputProcessor
 	private Vector2 worldPosition;
 	private int mouseButton = -1;
 	
-	public Weapon(ClientPlayer s)
+	public Weapon(ClientShip s)
 	{
 		ship = s;
 		target = new Vector2();
@@ -122,10 +122,10 @@ public class Weapon// implements InputProcessor
 		// Draw weapon.
 		shape.begin(ShapeType.Line);
 		shape.setColor(1, 1, 1, 1);
-		Vector3 a = new Vector3(ship.position);
+		Vector2 a = ship.getPosition();
 		//a.add(target.x - 1280.0f * 0.5f, -target.y + 720.0f * 0.5f, 0.0f);
-		a.add(targetDirection.x * 100.0f, targetDirection.y * 100.0f, 0.0f);
-		shape.line(ship.position, a);
+		a.add(targetDirection.x * 100.0f, targetDirection.y * 100.0f);
+		shape.line(ship.getPosition(), a);
 		shape.end();
 		
 		// Draw projectiles.

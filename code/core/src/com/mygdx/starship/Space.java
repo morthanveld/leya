@@ -30,7 +30,7 @@ public class Space
 	{
 	}
 	
-	public void render(OrthographicCamera camera, ClientPlayer ship)
+	public void render(OrthographicCamera camera, ClientShip ship)
 	{
 		shape.setProjectionMatrix(camera.combined);
 		shape.begin(ShapeType.Point);
