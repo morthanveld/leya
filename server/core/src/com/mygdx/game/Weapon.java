@@ -29,7 +29,7 @@ public class Weapon
 		cooldown = 0.5f;
 		timer = 0.0f;
 		power = 100.0f * 10.0f;
-		projectileLife = 3.0f;
+		projectileLife = 10.0f;
 		
 		//projectiles = new Array<Projectile>();
 	}

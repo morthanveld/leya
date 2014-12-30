@@ -1,25 +1,16 @@
 package com.mygdx.starship;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.regex.Pattern;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Net.Protocol;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.maps.Map;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.net.Socket;
 import com.badlogic.gdx.net.SocketHints;
 
@@ -74,11 +65,6 @@ public class Game extends ApplicationAdapter
 		lastKeyboardPacket = new String();
 		lastMousePacket = new String();
 		
-		
-		/*
-		InputMultiplexer multiplexer = new InputMultiplexer();
-		multiplexer.addProcessor(ship);*/
-		//multiplexer.addProcessor(ship.weapon);
 		clientInput = new ClientInput(ship);
 		Gdx.input.setInputProcessor(clientInput);
 	}
@@ -109,6 +95,7 @@ public class Game extends ApplicationAdapter
 		}
 		
 		// Render projectiles.
+		
 		projectileManager.updatePhysics(dt);
 		projectileManager.render(camera);
 
@@ -155,6 +142,7 @@ public class Game extends ApplicationAdapter
 				{
 					int numPlayers = (list.length - 1)/4;
 					//System.out.println("numplayers: " + numPlayers);
+					//System.err.println("position data");
 					
 					for (int i = 0; i < numPlayers; i++)
 					{
@@ -170,7 +158,6 @@ public class Game extends ApplicationAdapter
 							// Update position and direction.
 							//System.out.println("client: update me player");
 							
-							//ship.position.set(x, y, 0.0f);
 							ship.setPosition(x, y);
 							ship.setDirection(dir);
 						}
@@ -216,9 +203,10 @@ public class Game extends ApplicationAdapter
 					}
 					*/
 					
-					//projectileManager.clear();
+					projectileManager.clear();
 					
 					//System.out.println("client: projectile fire");
+					//System.err.println("projectile data");
 					
 					for (int i = 0; i < numProjectiles; i++)
 					{

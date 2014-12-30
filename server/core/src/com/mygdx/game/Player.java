@@ -2,15 +2,19 @@ package com.mygdx.game;
 
 import java.util.regex.Pattern;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.CircleShape;
+import com.badlogic.gdx.physics.box2d.Fixture;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 
 public class Player 
 {
-	private String name;
+	//private String name = null;
 	private ConnectionHandler connection;
 	
 	private Vector2 position;
@@ -19,7 +23,6 @@ public class Player
 	
 	private Quaternion orientation;
 	private float direction;
-	private float angularVelocity;
 	private float angularAcceleration;
 		
 	private float drivePower;
@@ -38,10 +41,12 @@ public class Player
 	private static final int KEY_Q = 4;
 	private static final int KEY_E = 5;
 	
+	private Body body = null;
+	
 	public Player(StarshipServer server, ConnectionHandler connection)
 	{
 		this.id = 0;
-		this.name = new String(connection.toString());
+		//this.name = new String(connection.toString());
 		this.connection = connection;
 		this.server = server;
 		
@@ -51,13 +56,47 @@ public class Player
 		
 		orientation = new Quaternion();
 		direction = 0.0f;
-		angularVelocity = 0.0f;
 		angularAcceleration = 0.0f;
 			
-		drivePower = 3200.0f * 0.1f;
-		turnPower = 3000.0f * 0.03f;
+		drivePower = 3200.0f * 0.1f * 1000.0f;
+		turnPower = 3000.0f * 0.03f * 10000.0f;
 		
 		weapon = new Weapon(this);
+		
+		setupPhysics();
+	}
+	
+	public void setupPhysics()
+	{
+		// First we create a body definition
+		BodyDef bodyDef = new BodyDef();
+		// We set our body to dynamic, for something like ground which doesn't move we would set it to StaticBody
+		bodyDef.type = BodyType.DynamicBody;
+		// Set our body's starting position in the world
+		bodyDef.position.set(this.position);
+		bodyDef.angularDamping = 0.2f;
+		bodyDef.linearDamping = 0.2f;
+
+		// Create our body in the world using our body definition
+		body = this.server.getWorld().createBody(bodyDef);
+
+		// Create a circle shape and set its radius to 6
+		CircleShape circle = new CircleShape();
+		circle.setRadius(32.0f);
+
+		// Create a fixture definition to apply our shape to
+		FixtureDef fixtureDef = new FixtureDef();
+		fixtureDef.shape = circle;
+		fixtureDef.density = 0.5f; 
+		fixtureDef.friction = 0.4f;
+		fixtureDef.restitution = 0.6f; // Make it bounce a little bit
+
+		// Create our fixture and attach it to the body
+		Fixture fixture = body.createFixture(fixtureDef);
+
+		// Remember to dispose of any shapes after you're done with them!
+		// BodyDef and FixtureDef don't need disposing, but shapes do.
+		circle.dispose();
 	}
 	
 	public void updatePhysics(float dt)
@@ -73,25 +112,19 @@ public class Player
 		
 		// Update ship physics.
 		weapon.update(dt);
+		
+		// Apply angular movement to player.
+		body.applyTorque(angularAcceleration, true);
 
-		// Reduce acceleration to zero gradually.
-		//Vector2 dampening = new Vector2(acceleration.nor());
-		//dampening.scl(-0.02f * dt);
+		// Apply linear movement to player.
 		Vector2 a = new Vector2(acceleration);
+		a.rotate(body.getAngle() * 180.0f / 3.141592f);
+		body.applyForceToCenter(a, true);
 
-		velocity.mulAdd(a, dt);
-
-		// Put some viscosity in space. Velocity in opposite direction.
-		velocity.mulAdd(velocity, -0.25f * dt);
-
-		position.mulAdd(velocity, dt);
-		orientation.setFromAxis(0.0f, 0.0f, 1.0f, direction);
-
-		//angularAcceleration *= 0.98f;
-		angularVelocity += angularAcceleration * dt;
-		angularVelocity -= angularVelocity * 0.5f * dt;
-		direction += angularVelocity * dt;
-	
+ 
+		position.set(body.getPosition());
+		orientation.set(new Vector3(0.0f, 0.0f, 1.0f), body.getAngle());
+		this.direction = body.getAngle() * 180.0f / 3.141592f;
 		//System.out.println(id + " | " + connection.getInboxSize() + " | " + connection.getOutboxSize());
 	}
 	
@@ -142,12 +175,12 @@ public class Player
 					if (Byte.valueOf(list[KEY_W + 2]).byteValue() > 0)
 					{
 						acceleration.set(0.0f, drivePower);
-						acceleration.rotate(direction);
+						//acceleration.rotate(direction);
 					}
 					if (Byte.valueOf(list[KEY_S + 2]).byteValue() > 0)
 					{
 						acceleration.set(0.0f, -drivePower);
-						acceleration.rotate(direction);
+						//acceleration.rotate(direction);
 					}
 					if (Byte.valueOf(list[KEY_Q + 2]).byteValue() > 0)
 					{

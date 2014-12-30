@@ -38,6 +38,7 @@ public class ProjectileManager
 	
 	public void updatePhysics(float dt)
 	{
+		/*
 		for (Projectile p : projs.values())
 		{
 			Vector2 m = new Vector2(p.velocity);
@@ -48,6 +49,7 @@ public class ProjectileManager
 			
 			//System.out.println("projectile-manager: " + p.getPosition() + " " + p.velocity + " " + dt);
 		}
+		*/
 	}
 	
 	public void clear()
@@ -60,13 +62,17 @@ public class ProjectileManager
 		if (projs.containsKey(id))
 		{
 			Projectile p = projs.get(id);
+			p.setPosition(x, y);
+			p.setAlive(true);
+			/*
 			Vector2 pos = p.getPosition();
 			pos.sub(x, y);
+			*/
 			
 			// TODO: Offset in position between server and client could be fixed by sending bullet positions every frame.
 			//System.out.println("client: projectile sync offset " + pos.len());
 			
-			projs.remove(id);
+			//projs.remove(id);
 		}
 		else
 		{

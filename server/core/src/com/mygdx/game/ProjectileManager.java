@@ -1,6 +1,7 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 
 public class ProjectileManager
@@ -15,8 +16,11 @@ public class ProjectileManager
 	private final Object projectileArrayLock = new Object();
 	private final Object projectileDataLock = new Object();
 	
-	public ProjectileManager()
+	private World world = null;
+	
+	public ProjectileManager(World world)
 	{
+		this.world = world;
 		synchronized (projectileArrayLock)
 		{
 			projectileArray = new Array<Projectile>();
@@ -49,14 +53,20 @@ public class ProjectileManager
 				if (p.life < 0.0f)
 				{
 					// Projectile dead.
-					addProjectileData(p);
+					//addProjectileData(p);
+					p.destroy();
 					projectileArray.removeIndex(i);
 					continue;
 				}
 
+				/*
 				Vector2 m = new Vector2(p.velocity);
 				m.scl(dt);
 				p.position.add(m);
+				*/
+				p.position.set(p.getBody().getPosition());
+				
+				addProjectileData(p);
 
 				i++;
 
@@ -124,12 +134,14 @@ public class ProjectileManager
 	
 	public void create(Vector2 pos, Vector2 vel, float l)
 	{	
-		Projectile p = new Projectile(projectileId++);
+		Projectile p = new Projectile(world, projectileId++, pos, vel, l);
+		/*
 		p.position.set(pos);
 		p.velocity.set(vel);
 		p.life = l;
+		*/
 		
-		addProjectileData(p);
+		//addProjectileData(p);
 		
 		synchronized (projectileArrayLock)
 		{
