@@ -4,27 +4,17 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
-import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.World;
 
 public class Projectile 
 {
-	/*
-	public static final int NEW = 0x0;
-	public static final int LIVING = 0x1;
-	public static final int DEAD = 0x2;
-	public static final int DELETE = 0x3;
-	*/
-	
 	public Vector2 position;
 	public Vector2 velocity;
 	public float life;
 	public int id;
-	//public boolean dirty = false;
-	
-//	public int state = 0;
+
 	private Body body = null;
 	private World world = null;
 	
@@ -46,7 +36,7 @@ public class Projectile
 		bodyDef.fixedRotation = true;
 
 		// Create our body in the world using our body definition
-		body = world.createBody(bodyDef);
+		this.body = world.createBody(bodyDef);
 
 		// Create a circle shape and set its radius to 6
 		CircleShape circle = new CircleShape();
@@ -60,7 +50,8 @@ public class Projectile
 		fixtureDef.restitution = 0.6f; // Make it bounce a little bit
 
 		// Create our fixture and attach it to the body
-		Fixture fixture = body.createFixture(fixtureDef);
+		//Fixture fixture = 
+		body.createFixture(fixtureDef);
 
 		// Remember to dispose of any shapes after you're done with them!
 		// BodyDef and FixtureDef don't need disposing, but shapes do.

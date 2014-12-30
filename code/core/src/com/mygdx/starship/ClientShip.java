@@ -64,9 +64,6 @@ public class ClientShip
 		batch.begin();
 		batch.draw(img, -img.getWidth() * 0.5f, -img.getHeight() * 0.5f);
 		batch.end();
-		
-		// Render weapon.
-		//weapon.render(camera);
 	}
 	
 	public void setPosition(float x, float y)

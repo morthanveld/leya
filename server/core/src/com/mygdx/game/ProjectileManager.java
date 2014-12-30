@@ -39,8 +39,6 @@ public class ProjectileManager
 	public void updatePhysics(float dt)
 	{
 		dirtySize = 0;
-		
-		//for (Projectile p : projs)
 		int i = 0;
 		
 		synchronized (projectileArrayLock)
@@ -59,18 +57,13 @@ public class ProjectileManager
 					continue;
 				}
 
-				/*
-				Vector2 m = new Vector2(p.velocity);
-				m.scl(dt);
-				p.position.add(m);
-				*/
+				// Read position from simulation.
 				p.position.set(p.getBody().getPosition());
 				
+				// Add projectile data to packet.
 				addProjectileData(p);
 
 				i++;
-
-				//System.out.println("projectile-manager: " + p.position);
 			}
 		}
 	}
@@ -135,13 +128,6 @@ public class ProjectileManager
 	public void create(Vector2 pos, Vector2 vel, float l)
 	{	
 		Projectile p = new Projectile(world, projectileId++, pos, vel, l);
-		/*
-		p.position.set(pos);
-		p.velocity.set(vel);
-		p.life = l;
-		*/
-		
-		//addProjectileData(p);
 		
 		synchronized (projectileArrayLock)
 		{

@@ -5,19 +5,18 @@ import java.util.Random;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.Vector;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
 public class Space
 {
 	private ShapeRenderer shape;
-	private Array stars;
+	private Array<Vector3> stars;
 	
 	public Space()
 	{
 		shape = new ShapeRenderer();
-		stars = new Array();
+		stars = new Array<Vector3>();
 		
 		Random generator = new Random(21);
 		for (int i = 0; i < 100; i++)

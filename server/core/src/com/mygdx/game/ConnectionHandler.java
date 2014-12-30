@@ -16,8 +16,6 @@ public class ConnectionHandler implements Runnable
 	private final Object outboxLock = new Object();
 	private final Object inboxLock = new Object();
 	
-	private int count = 0;
-	
 	private boolean disconnected = false;
 	
 	public ConnectionHandler(Socket socket)
@@ -92,10 +90,6 @@ public class ConnectionHandler implements Runnable
 				e.printStackTrace();
 			}
 		}
-		
-		
-		
-		//System.out.println("Client disconnected " + clientSocket.getRemoteAddress());
 	}
 	
 	private void sendPacket(Packet p)
@@ -104,8 +98,6 @@ public class ConnectionHandler implements Runnable
 		{
 			clientSocket.getOutputStream().write(p.getData());
 			clientSocket.getOutputStream().flush();
-			
-			count++;
 		} 
 		catch (IOException e) 
 		{

@@ -35,9 +35,6 @@ public class Game extends ApplicationAdapter
 	
 	private float ioTimer = 0.0f;
 	
-	private String lastKeyboardPacket = null;
-	private String lastMousePacket = null;
-	
 	private ClientInput clientInput = null;
 	
 	@Override
@@ -61,10 +58,7 @@ public class Game extends ApplicationAdapter
 		ships = new HashMap<Byte, ClientShip>();
 		
 		projectileManager = new ProjectileManager();
-		
-		lastKeyboardPacket = new String();
-		lastMousePacket = new String();
-		
+			
 		clientInput = new ClientInput(ship);
 		Gdx.input.setInputProcessor(clientInput);
 	}

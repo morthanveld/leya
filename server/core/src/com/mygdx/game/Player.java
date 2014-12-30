@@ -8,13 +8,11 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
-import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 
 public class Player 
 {
-	//private String name = null;
 	private ConnectionHandler connection;
 	
 	private Vector2 position;
@@ -46,7 +44,6 @@ public class Player
 	public Player(StarshipServer server, ConnectionHandler connection)
 	{
 		this.id = 0;
-		//this.name = new String(connection.toString());
 		this.connection = connection;
 		this.server = server;
 		
@@ -78,7 +75,7 @@ public class Player
 		bodyDef.linearDamping = 0.2f;
 
 		// Create our body in the world using our body definition
-		body = this.server.getWorld().createBody(bodyDef);
+		this.body = this.server.getWorld().createBody(bodyDef);
 
 		// Create a circle shape and set its radius to 6
 		CircleShape circle = new CircleShape();
@@ -92,7 +89,8 @@ public class Player
 		fixtureDef.restitution = 0.6f; // Make it bounce a little bit
 
 		// Create our fixture and attach it to the body
-		Fixture fixture = body.createFixture(fixtureDef);
+		//Fixture fixture = 
+		body.createFixture(fixtureDef);
 
 		// Remember to dispose of any shapes after you're done with them!
 		// BodyDef and FixtureDef don't need disposing, but shapes do.
@@ -192,9 +190,6 @@ public class Player
 				else if (type == Packet.IO_MOUSE)
 				{
 					// Mouse input from player.
-					//System.out.println("server: mouse input from player");
-					//System.out.println("server: " + new String(data));
-					
 					float x = Float.valueOf(list[2]).floatValue();
 					float y = Float.valueOf(list[3]).floatValue();
 					int button = Integer.valueOf(list[4]).intValue();
@@ -202,7 +197,6 @@ public class Player
 					weapon.setTarget(new Vector2(x, y));
 					if (button >= 0)
 					{
-						//System.out.println("server: fire " + button);
 						weapon.fire();
 					}
 				}

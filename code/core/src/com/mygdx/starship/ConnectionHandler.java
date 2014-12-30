@@ -16,8 +16,6 @@ public class ConnectionHandler implements Runnable
 	private final Object outboxLock = new Object();
 	private final Object inboxLock = new Object();
 	
-	private int count = 0;
-	
 	public ConnectionHandler(Socket socket)
 	{
 		clientSocket = socket;
@@ -102,7 +100,6 @@ public class ConnectionHandler implements Runnable
 
 				// Read data from client.
 				String d = buffer.readLine();
-				//System.out.println(d);
 				packetInbox.add(new Packet(d.getBytes()));
 			}
 		} 
