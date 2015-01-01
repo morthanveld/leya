@@ -3,6 +3,7 @@ package com.mygdx.game;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.ai.steer.behaviors.Seek;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector2;
@@ -58,6 +59,22 @@ public class StarshipServer extends ApplicationAdapter
 		groundBody.createFixture(groundBox, 0.0f); 
 		// Clean up after ourselves
 		groundBox.dispose();
+		
+		/*
+		Player target = new Player(this, null);
+		Player agent = new Player(this, null);
+		
+		target.setPosition(new Vector2(100.0f, 100.0f));
+		agent.setPosition(new Vector2(-100.0f, -300.0f));
+		
+		target.setupPhysics();
+		agent.setupPhysics();
+
+		agent.setSteeringBehavior(new Seek<Vector2>(agent, target));
+			
+		players.add(target);
+		players.add(agent);
+		*/
 		
 		// Start listening on incoming clients.
 		listen();
@@ -115,6 +132,9 @@ public class StarshipServer extends ApplicationAdapter
 		{
 			// Update player ship.
 			p.updatePhysics(dt);
+			
+			// Update AI.
+			p.updateAi(dt);
 		}
 		
 		// Update projectiles.

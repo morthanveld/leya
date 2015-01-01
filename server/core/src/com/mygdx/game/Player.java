@@ -2,6 +2,10 @@ package com.mygdx.game;
 
 import java.util.regex.Pattern;
 
+import com.badlogic.gdx.ai.steer.Steerable;
+import com.badlogic.gdx.ai.steer.SteeringAcceleration;
+import com.badlogic.gdx.ai.steer.SteeringBehavior;
+import com.badlogic.gdx.ai.steer.behaviors.Seek;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -11,7 +15,7 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 
-public class Player 
+public class Player implements Steerable<Vector2>
 {
 	private ConnectionHandler connection;
 	
@@ -22,6 +26,7 @@ public class Player
 	private Quaternion orientation;
 	private float direction;
 	private float angularAcceleration;
+	private float newDirection;
 		
 	private float drivePower;
 	private float turnPower;
@@ -41,6 +46,13 @@ public class Player
 	
 	private Body body = null;
 	
+	private float maxValue = 10000.0f;
+	private float radius = 32.0f;
+	private boolean tagged = false; 
+	
+	private SteeringBehavior<Vector2> steeringBehavior = null;
+	private static final SteeringAcceleration<Vector2> steeringOutput = new SteeringAcceleration<Vector2>(new Vector2());
+	
 	public Player(StarshipServer server, ConnectionHandler connection)
 	{
 		this.id = 0;
@@ -54,13 +66,25 @@ public class Player
 		orientation = new Quaternion();
 		direction = 0.0f;
 		angularAcceleration = 0.0f;
+		newDirection = 0.0f;
 			
 		drivePower = 3200.0f * 0.1f * 1000.0f;
 		turnPower = 3000.0f * 0.03f * 10000.0f;
 		
 		weapon = new Weapon(this);
+					
+		if (connection != null)
+		{
+			// TODO: This is a special case for playable clients.
+			setupPhysics();
+		}
+		else
+		{
+			// Agent
+			this.id = (byte) (int) (Math.random() * 100.0f + 1.0f);
+		}
 		
-		setupPhysics();
+		//steeringBehavior = new Seek<Vector2>(this);
 	}
 	
 	public void setupPhysics()
@@ -79,7 +103,7 @@ public class Player
 
 		// Create a circle shape and set its radius to 6
 		CircleShape circle = new CircleShape();
-		circle.setRadius(32.0f);
+		circle.setRadius(this.radius);
 
 		// Create a fixture definition to apply our shape to
 		FixtureDef fixtureDef = new FixtureDef();
@@ -95,6 +119,11 @@ public class Player
 		// Remember to dispose of any shapes after you're done with them!
 		// BodyDef and FixtureDef don't need disposing, but shapes do.
 		circle.dispose();
+	}
+	
+	public void setSteeringBehavior(SteeringBehavior sb)
+	{
+		this.steeringBehavior = sb;
 	}
 	
 	public void updatePhysics(float dt)
@@ -118,7 +147,6 @@ public class Player
 		Vector2 a = new Vector2(acceleration);
 		a.rotate(body.getAngle() * 180.0f / 3.141592f);
 		body.applyForceToCenter(a, true);
-
  
 		position.set(body.getPosition());
 		orientation.set(new Vector3(0.0f, 0.0f, 1.0f), body.getAngle());
@@ -126,13 +154,56 @@ public class Player
 		//System.out.println(id + " | " + connection.getInboxSize() + " | " + connection.getOutboxSize());
 	}
 	
+	public void updateAi(float dt)
+	{
+		 if (steeringBehavior != null && this.connection == null) 
+		 {
+			 // Calculate steering acceleration
+			 steeringBehavior.calculateSteering(steeringOutput);
+			 
+			 Vector2 ll = new Vector2(steeringOutput.linear);
+			 ll.x = 0.0f;
+			 acceleration.set(ll);
+//			 angularAcceleration = steeringOutput.angular;
+			 
+			 Vector2 linear = new Vector2(steeringOutput.linear);
+			 Vector2 from = new Vector2(0.0f, 1.0f);
+			 newDirection = from.angle(linear);
+			 
+			 if (newDirection != this.direction)
+			 {
+				 angularAcceleration = (newDirection - this.direction) * dt * 100000.0f * 2.0f;
+			 }
+			 /*
+			 float newOrientation = calculateOrientationFromLinearVelocity(this);
+	            if (newOrientation != this.orientation) {
+	                this.angularVelocity = (newOrientation - this.orientation) * time;
+	                this.orientation = newOrientation;
+	            }
+	            */
+		 }
+	}
+	
+	public float calculateOrientationFromLinearVelocity(Vector2 from, Vector2 to)
+	{
+		return from.angle(to);
+	}
+	
 	public void addPacket(Packet p)
 	{
-		connection.addPacket(p);
+		//if (connection != null)
+		{
+			connection.addPacket(p);
+		}
 	}
 	
 	public void receivePacket()
 	{
+		//if (connection == null)
+		{
+//			return;
+		}
+		
 		Packet p = null;
 		byte[] data = null;
 		while ((p = connection.getPacket()) != null)
@@ -243,5 +314,92 @@ public class Player
 	public ProjectileManager getProjectileManager()
 	{
 		return server.getProjectileManager();
+	}
+
+	@Override
+	public float getMaxLinearSpeed() {
+		return this.maxValue;
+	}
+
+	@Override
+	public void setMaxLinearSpeed(float maxLinearSpeed) {
+		this.maxValue = maxLinearSpeed;
+	}
+
+	@Override
+	public float getMaxLinearAcceleration() {
+		return this.maxValue;
+	}
+
+	@Override
+	public void setMaxLinearAcceleration(float maxLinearAcceleration) {
+		this.maxValue = maxLinearAcceleration;
+	}
+
+	@Override
+	public float getMaxAngularSpeed() {
+		return this.maxValue;
+	}
+
+	@Override
+	public void setMaxAngularSpeed(float maxAngularSpeed) {
+		this.maxValue = maxAngularSpeed;
+	}
+
+	@Override
+	public float getMaxAngularAcceleration() {
+		return this.maxValue;
+	}
+
+	@Override
+	public void setMaxAngularAcceleration(float maxAngularAcceleration) {
+		this.maxValue = maxAngularAcceleration;
+	}
+
+	@Override
+	public float getOrientation() {
+		return body.getAngle();
+	}
+
+	@Override
+	public Vector2 getLinearVelocity() {
+		return body.getLinearVelocity();
+	}
+
+	@Override
+	public float getAngularVelocity() {
+		return body.getAngularVelocity();
+	}
+
+	@Override
+	public float getBoundingRadius() {
+		return this.radius;
+	}
+
+	@Override
+	public boolean isTagged() {
+		return this.tagged;
+	}
+
+	@Override
+	public void setTagged(boolean tagged) {
+		this.tagged = tagged;
+	}
+
+	@Override
+	public Vector2 newVector() {
+		return new Vector2();
+	}
+
+	@Override
+	public float vectorToAngle(Vector2 vector) {
+		return (float)Math.atan2(-vector.x, vector.y);
+	}
+
+	@Override
+	public Vector2 angleToVector(Vector2 outVector, float angle) {
+		outVector.x = -(float)Math.sin(angle);
+        outVector.y = (float)Math.cos(angle);
+        return outVector;
 	}
 }
