@@ -3,10 +3,16 @@ package com.mygdx.game;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.ai.steer.behaviors.CollisionAvoidance;
+import com.badlogic.gdx.ai.steer.behaviors.PrioritySteering;
 import com.badlogic.gdx.ai.steer.behaviors.Pursue;
 import com.badlogic.gdx.ai.steer.behaviors.Seek;
+import com.badlogic.gdx.ai.steer.behaviors.Wander;
+import com.badlogic.gdx.ai.steer.limiters.LinearAccelerationLimiter;
+import com.badlogic.gdx.ai.steer.proximities.RadiusProximity;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -34,6 +40,8 @@ public class StarshipServer extends ApplicationAdapter
 	private Player agent; 
 	private Player target;
 	
+	private Array<RadiusProximity<Vector2>> proximities;
+	
 	public void create () 
 	{
 		//System.out.close();
@@ -46,6 +54,7 @@ public class StarshipServer extends ApplicationAdapter
 		players = new Array<Player>();
 		projectileManager = new ProjectileManager(world);
 				
+		this.proximities = new Array<RadiusProximity<Vector2>>();
 		createAiTest();
 		
 		// Start listening on incoming clients.
@@ -53,12 +62,33 @@ public class StarshipServer extends ApplicationAdapter
 	}
 	
 	public void createAiTest()
-	{		
-		for (int i = 0; i < 1; i++)
+	{	
+		for (int i = 0; i < 20; i++)
 		{
 			Player p = new Player(this, null);
 			p.setPosition(new Vector2((float)Math.random() * 400.0f, (float)Math.random() * 400.0f));
 			p.setupPhysics();
+			
+			// Wander behavior.
+			Wander<Vector2> w = new Wander<Vector2>(p);
+			w.setFaceEnabled(false);
+			w.setWanderOffset(500);
+			w.setWanderOrientation(10);
+			w.setWanderRadius(1000);
+			w.setWanderRate(MathUtils.PI * 10);
+					
+			// Collision avoidance behavior.
+			RadiusProximity<Vector2> rp = new RadiusProximity<Vector2>(p, players, 300.0f);
+			this.proximities.add(rp);
+			CollisionAvoidance<Vector2> collisionAvoidanceSB = new CollisionAvoidance<Vector2>(p, rp);
+			
+			// Add behaviors.
+			PrioritySteering<Vector2> prioritySteeringSB = new PrioritySteering<Vector2>(p, 0.0001f);
+			prioritySteeringSB.add(collisionAvoidanceSB);
+			prioritySteeringSB.add(w);
+			
+			p.setSteeringBehavior(prioritySteeringSB);
+			
 			players.add(p);
 		}
 	}
@@ -186,7 +216,7 @@ public class StarshipServer extends ApplicationAdapter
 		
 		for (Player a : players)
 		{
-			a.setSteeringBehavior(new Pursue<Vector2>(a, p));
+			//a.setSteeringBehavior(new Pursue<Vector2>(a, p));
 		}
 	}
 	

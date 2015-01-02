@@ -175,6 +175,7 @@ public class Player implements Steerable<Vector2>
 			 acceleration.set(0.0f, vv);
 			 
 			 //System.out.println("linear: " + ll + "\t" + acceleration);
+			 //System.out.println(steeringOutput.linear);
 			 
 			 Vector2 linear = new Vector2(steeringOutput.linear);
 			 Vector2 from = new Vector2(0.0f, 1.0f);
