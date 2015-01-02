@@ -46,12 +46,16 @@ public class Player implements Steerable<Vector2>
 	
 	private Body body = null;
 	
-	private float maxValue = 10000.0f;
 	private float radius = 32.0f;
 	private boolean tagged = false; 
 	
 	private SteeringBehavior<Vector2> steeringBehavior = null;
 	private static final SteeringAcceleration<Vector2> steeringOutput = new SteeringAcceleration<Vector2>(new Vector2());
+	
+	private float maxLinearSpeed = 320000.0f;
+	private float maxLinearAcceleration = 320000.0f;
+	private float maxAngularSpeed = 100000.0f;
+	private float maxAngularAcceleration = 3000000.0f;
 	
 	public Player(StarshipServer server, ConnectionHandler connection)
 	{
@@ -69,7 +73,7 @@ public class Player implements Steerable<Vector2>
 		newDirection = 0.0f;
 			
 		drivePower = 3200.0f * 0.1f * 1000.0f;
-		turnPower = 3000.0f * 0.03f * 10000.0f;
+		turnPower = 3000.0f * 0.1f * 10000.0f;
 		
 		weapon = new Weapon(this);
 					
@@ -95,7 +99,7 @@ public class Player implements Steerable<Vector2>
 		bodyDef.type = BodyType.DynamicBody;
 		// Set our body's starting position in the world
 		bodyDef.position.set(this.position);
-		bodyDef.angularDamping = 0.2f;
+		bodyDef.angularDamping = 0.5f;
 		bodyDef.linearDamping = 0.2f;
 
 		// Create our body in the world using our body definition
@@ -128,10 +132,13 @@ public class Player implements Steerable<Vector2>
 	
 	public void updatePhysics(float dt)
 	{
-		if (connection.isDisconnected())
+		if (connection != null)
 		{
-			// If connection dies, unregister player at server.
-			server.unregisterPlayer(this);
+			if (connection.isDisconnected())
+			{
+				// If connection dies, unregister player at server.
+				server.unregisterPlayer(this);
+			}
 		}
 		
 		// Receive network data.
@@ -162,25 +169,27 @@ public class Player implements Steerable<Vector2>
 			 steeringBehavior.calculateSteering(steeringOutput);
 			 
 			 Vector2 ll = new Vector2(steeringOutput.linear);
-			 ll.x = 0.0f;
-			 acceleration.set(ll);
-//			 angularAcceleration = steeringOutput.angular;
+			 Vector2 dd = new Vector2(0.0f, 1.0f);
+			 dd.rotate(this.direction);
+			 float vv = ll.dot(dd);
+			 acceleration.set(0.0f, vv);
+			 
+			 //System.out.println("linear: " + ll + "\t" + acceleration);
 			 
 			 Vector2 linear = new Vector2(steeringOutput.linear);
 			 Vector2 from = new Vector2(0.0f, 1.0f);
 			 newDirection = from.angle(linear);
+
+			 Vector2 dv = new Vector2(0.0f, 1.0f);
+			 dv.rotate(body.getAngle() * 180.0f / 3.141592f);
 			 
-			 if (newDirection != this.direction)
-			 {
-				 angularAcceleration = (newDirection - this.direction) * dt * 100000.0f * 2.0f;
-			 }
-			 /*
-			 float newOrientation = calculateOrientationFromLinearVelocity(this);
-	            if (newOrientation != this.orientation) {
-	                this.angularVelocity = (newOrientation - this.orientation) * time;
-	                this.orientation = newOrientation;
-	            }
-	            */
+			 float diff = linear.angle(dv);
+			 
+			 float as = this.body.getAngularVelocity();
+			 float damp = (Math.abs(diff)/360.0f);
+			 this.body.setAngularDamping(Math.max(1.0f - damp * damp * damp, 0.5f));
+			 
+			 angularAcceleration = -diff / 45.0f * this.maxAngularAcceleration;
 		 }
 	}
 	
@@ -191,7 +200,7 @@ public class Player implements Steerable<Vector2>
 	
 	public void addPacket(Packet p)
 	{
-		//if (connection != null)
+		if (connection != null)
 		{
 			connection.addPacket(p);
 		}
@@ -199,9 +208,9 @@ public class Player implements Steerable<Vector2>
 	
 	public void receivePacket()
 	{
-		//if (connection == null)
+		if (connection == null)
 		{
-//			return;
+			return;
 		}
 		
 		Packet p = null;
@@ -318,42 +327,42 @@ public class Player implements Steerable<Vector2>
 
 	@Override
 	public float getMaxLinearSpeed() {
-		return this.maxValue;
+		return this.maxLinearSpeed;
 	}
 
 	@Override
 	public void setMaxLinearSpeed(float maxLinearSpeed) {
-		this.maxValue = maxLinearSpeed;
+		this.maxLinearSpeed = maxLinearSpeed;
 	}
 
 	@Override
 	public float getMaxLinearAcceleration() {
-		return this.maxValue;
+		return this.maxLinearAcceleration;
 	}
 
 	@Override
 	public void setMaxLinearAcceleration(float maxLinearAcceleration) {
-		this.maxValue = maxLinearAcceleration;
+		this.maxLinearAcceleration = maxLinearAcceleration;
 	}
 
 	@Override
 	public float getMaxAngularSpeed() {
-		return this.maxValue;
+		return this.maxAngularSpeed;
 	}
 
 	@Override
 	public void setMaxAngularSpeed(float maxAngularSpeed) {
-		this.maxValue = maxAngularSpeed;
+		this.maxAngularSpeed = maxAngularSpeed;
 	}
 
 	@Override
 	public float getMaxAngularAcceleration() {
-		return this.maxValue;
+		return this.maxAngularAcceleration;
 	}
 
 	@Override
 	public void setMaxAngularAcceleration(float maxAngularAcceleration) {
-		this.maxValue = maxAngularAcceleration;
+		this.maxAngularAcceleration = maxAngularAcceleration;
 	}
 
 	@Override

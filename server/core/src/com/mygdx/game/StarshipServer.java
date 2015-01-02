@@ -3,6 +3,7 @@ package com.mygdx.game;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.ai.steer.behaviors.Pursue;
 import com.badlogic.gdx.ai.steer.behaviors.Seek;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -30,6 +31,9 @@ public class StarshipServer extends ApplicationAdapter
 	Box2DDebugRenderer debugRenderer = null;
 	private OrthographicCamera camera;
 	
+	private Player agent; 
+	private Player target;
+	
 	public void create () 
 	{
 		//System.out.close();
@@ -42,42 +46,21 @@ public class StarshipServer extends ApplicationAdapter
 		players = new Array<Player>();
 		projectileManager = new ProjectileManager(world);
 				
-		// Create our body definition
-		BodyDef groundBodyDef = new BodyDef();  
-		// Set its world position
-		groundBodyDef.position.set(new Vector2(0, 200));  
-
-		// Create a body from the defintion and add it to the world
-		Body groundBody = world.createBody(groundBodyDef);  
-
-		// Create a polygon shape
-		PolygonShape groundBox = new PolygonShape();  
-		// Set the polygon shape as a box which is twice the size of our view port and 20 high
-		// (setAsBox takes half-width and half-height as arguments)
-		groundBox.setAsBox(camera.viewportWidth, 10.0f);
-		// Create a fixture from our polygon shape and add it to our ground body  
-		groundBody.createFixture(groundBox, 0.0f); 
-		// Clean up after ourselves
-		groundBox.dispose();
-		
-		/*
-		Player target = new Player(this, null);
-		Player agent = new Player(this, null);
-		
-		target.setPosition(new Vector2(100.0f, 100.0f));
-		agent.setPosition(new Vector2(-100.0f, -300.0f));
-		
-		target.setupPhysics();
-		agent.setupPhysics();
-
-		agent.setSteeringBehavior(new Seek<Vector2>(agent, target));
-			
-		players.add(target);
-		players.add(agent);
-		*/
+		createAiTest();
 		
 		// Start listening on incoming clients.
 		listen();
+	}
+	
+	public void createAiTest()
+	{		
+		for (int i = 0; i < 1; i++)
+		{
+			Player p = new Player(this, null);
+			p.setPosition(new Vector2((float)Math.random() * 400.0f, (float)Math.random() * 400.0f));
+			p.setupPhysics();
+			players.add(p);
+		}
 	}
 	
 	public World getWorld()
@@ -198,7 +181,13 @@ public class StarshipServer extends ApplicationAdapter
 	
 	public void registerPlayer(ConnectionHandler connection)
 	{
-		players.add(new Player(this, connection));
+		Player p = new Player(this, connection);
+		players.add(p);
+		
+		for (Player a : players)
+		{
+			a.setSteeringBehavior(new Pursue<Vector2>(a, p));
+		}
 	}
 	
 	public void unregisterPlayer(Player p)

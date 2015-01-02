@@ -229,7 +229,7 @@ public class Game extends ApplicationAdapter
         socketHints.connectTimeout = 4000;
         
         //create the socket and connect to the server entered in the text box ( x.x.x.x format ) on port 9021
-        socket = Gdx.net.newClientSocket(Protocol.TCP, "127.0.0.1", 1313, socketHints);
+        socket = Gdx.net.newClientSocket(Protocol.TCP, "127.0.0.1", 1315, socketHints);
         
         System.out.println("Connected to server " + socket.getRemoteAddress());
         
