@@ -46,16 +46,16 @@ public class Player implements Steerable<Vector2>
 	
 	private Body body = null;
 	
-	private float radius = 32.0f;
+	private float radius = Utils.downScale(32.0f);
 	private boolean tagged = false; 
 	
 	private SteeringBehavior<Vector2> steeringBehavior = null;
 	private static final SteeringAcceleration<Vector2> steeringOutput = new SteeringAcceleration<Vector2>(new Vector2());
 	
-	private float maxLinearSpeed = 320000.0f;
-	private float maxLinearAcceleration = 320000.0f;
-	private float maxAngularSpeed = 100000.0f;
-	private float maxAngularAcceleration = 3000000.0f;
+	private float maxLinearSpeed = 0.1f; //320000.0f;
+	private float maxLinearAcceleration = 0.3f; //320000.0f;
+	private float maxAngularSpeed = 0.1f; //100000.0f;
+	private float maxAngularAcceleration = 0.01f; //3000000.0f;
 	
 	private float life = 100.0f;
 	
@@ -79,8 +79,8 @@ public class Player implements Steerable<Vector2>
 		angularAcceleration = 0.0f;
 		newDirection = 0.0f;
 			
-		drivePower = 3200.0f * 0.1f * 1000.0f;
-		turnPower = 3000.0f * 0.1f * 10000.0f;
+		drivePower = 0.1f; //3200.0f * 0.1f * 1000.0f;
+		turnPower = 0.03f; //3000.0f * 0.1f * 10000.0f;
 		
 		weapon = new Weapon(this);
 					

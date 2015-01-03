@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.net.Socket;
 import com.badlogic.gdx.net.SocketHints;
+import com.mygdx.game.Utils;
 
 public class Game extends ApplicationAdapter 
 {
@@ -132,6 +133,8 @@ public class Game extends ApplicationAdapter
 				Pattern pattern =  Pattern.compile(";");
 				String[] list = pattern.split(a.subSequence(0, a.length()));
 				
+				System.out.println(a);
+				
 				// Check if position data.
 				if (Byte.valueOf(list[0]) == Packet.POSITION)
 				{
@@ -144,8 +147,8 @@ public class Game extends ApplicationAdapter
 						
 						byte pid = Byte.valueOf(list[i * 5 + 1]).byteValue();
 						byte type = Byte.valueOf(list[i * 5 + 2]).byteValue();
-						float x = Float.valueOf(list[i * 5 + 3]).floatValue();
-						float y = Float.valueOf(list[i * 5 + 4]).floatValue();
+						float x = Utils.upScale(Float.valueOf(list[i * 5 + 3]).floatValue());
+						float y = Utils.upScale(Float.valueOf(list[i * 5 + 4]).floatValue());
 						float dir = Float.valueOf(list[i * 5 + 5]).floatValue();
 											
 						// Check if data from server is intended for me.
@@ -210,10 +213,10 @@ public class Game extends ApplicationAdapter
 					for (int i = 0; i < numProjectiles; i++)
 					{
 						int pid = Integer.valueOf(list[i * 5 + 1]).intValue();
-						float x = Float.valueOf(list[i * 5 + 2]).floatValue();
-						float y = Float.valueOf(list[i * 5 + 3]).floatValue();
-						float vx = Float.valueOf(list[i * 5 + 4]).floatValue();
-						float vy = Float.valueOf(list[i * 5 + 5]).floatValue();
+						float x = Utils.upScale(Float.valueOf(list[i * 5 + 2]).floatValue());
+						float y = Utils.upScale(Float.valueOf(list[i * 5 + 3]).floatValue());
+						float vx = Utils.upScale(Float.valueOf(list[i * 5 + 4]).floatValue());
+						float vy = Utils.upScale(Float.valueOf(list[i * 5 + 5]).floatValue());
 						
 						projectileManager.addProjectile(pid, x, y, vx, vy);
 					}
@@ -265,37 +268,6 @@ public class Game extends ApplicationAdapter
 				connectionHandler.addPacket(new Packet(a.toString().getBytes()));
 				//lastKeyboardPacket = a.toString();
 			}
-		}
-	
-		
-		//if (ship.weapon.getInputArraySize() > 0)
-		{
-			/*
-			Vector2 pos = ship.weapon.getWorldPosition();
-			pos.add(ship.position.x, ship.position.y);
-			
-			StringBuffer a = new StringBuffer();
-			a.append(id);		
-			a.append(";");
-			a.append(Packet.IO_MOUSE);
-			
-			a.append(";");
-			a.append(pos.x);
-			a.append(";");
-			a.append(pos.y);
-			a.append(";");
-			a.append(ship.weapon.getMouseButton());
-			a.append("\n");
-			
-			//System.out.println("mouse " + a.toString());
-
-			if (!lastMousePacket.equals(a.toString()))
-			{
-				connectionHandler.addPacket(new Packet(a.toString().getBytes()));
-				//lastMousePacket = a.toString();
-			}
-			*/
-			
 		}
 	}
 }

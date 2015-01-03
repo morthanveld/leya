@@ -21,6 +21,7 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.Utils;
 
 public class StarshipServer extends ApplicationAdapter 
 {
@@ -60,7 +61,7 @@ public class StarshipServer extends ApplicationAdapter
 		Box2D.init();
 		world = new World(new Vector2(0.0f, 0.0f), true);
 		
-		camera = new OrthographicCamera(1280, 720);
+		camera = new OrthographicCamera(Utils.downScale(3280), Utils.downScale(1720));
 		debugRenderer = new Box2DDebugRenderer();
 		
 		players = new Array<Player>();
@@ -70,7 +71,7 @@ public class StarshipServer extends ApplicationAdapter
 		spawnLocations.add(new SpawnLocation(this, new Vector2()));
 				
 		this.proximities = new Array<RadiusProximity<Vector2>>();
-		//createAiTest();
+		createAiTest();
 		
 		
 		
@@ -80,9 +81,10 @@ public class StarshipServer extends ApplicationAdapter
 	
 	public void createAiTest()
 	{	
-		for (int i = 0; i < 20; i++)
+		for (int i = 0; i < 3; i++)
 		{
-			createEnemy(new Vector2((float)Math.random() * 400.0f, (float)Math.random() * 400.0f));
+			Vector2 p = new Vector2((float)Math.random() * 400.0f, (float)Math.random() * 400.0f);
+			createEnemy(Utils.downScale(p));
 		}
 	}
 	
@@ -95,13 +97,13 @@ public class StarshipServer extends ApplicationAdapter
 		// Wander behavior.
 		Wander<Vector2> w = new Wander<Vector2>(p);
 		w.setFaceEnabled(false);
-		w.setWanderOffset(500);
-		w.setWanderOrientation(10);
-		w.setWanderRadius(1000);
-		w.setWanderRate(MathUtils.PI * 10);
+		w.setWanderOffset(Utils.downScale(100));
+		w.setWanderOrientation(Utils.downScale(10));
+		w.setWanderRadius(Utils.downScale(300));
+		w.setWanderRate(MathUtils.PI * 100);
 				
 		// Collision avoidance behavior.
-		RadiusProximity<Vector2> rp = new RadiusProximity<Vector2>(p, players, 300.0f);
+		RadiusProximity<Vector2> rp = new RadiusProximity<Vector2>(p, players, Utils.downScale(300.0f));
 		this.proximities.add(rp);
 		CollisionAvoidance<Vector2> collisionAvoidanceSB = new CollisionAvoidance<Vector2>(p, rp);
 		
@@ -151,8 +153,8 @@ public class StarshipServer extends ApplicationAdapter
 			e.printStackTrace();
 		}
 		
-		Gdx.gl.glClearColor(0, 0, 0, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		//Gdx.gl.glClearColor(0, 0, 0, 1);
+		//Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		debugRenderer.render(world, camera.combined);
 	}
 		

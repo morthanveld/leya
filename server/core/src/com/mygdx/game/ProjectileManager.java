@@ -59,7 +59,6 @@ public class ProjectileManager
 
 				// Read position from simulation.
 				p.position.set(p.getBody().getPosition());
-				System.out.println(p.getBody().getLinearVelocity());
 				
 				// Add projectile data to packet.
 				addProjectileData(p);
