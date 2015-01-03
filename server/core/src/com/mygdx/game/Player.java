@@ -57,6 +57,13 @@ public class Player implements Steerable<Vector2>
 	private float maxAngularSpeed = 100000.0f;
 	private float maxAngularAcceleration = 3000000.0f;
 	
+	private float life = 100.0f;
+	
+	private byte type;
+	
+	private static final byte ACTOR_PLAYER = 0;
+	private static final byte ACTOR_AGENT = 1;
+	
 	public Player(StarshipServer server, ConnectionHandler connection)
 	{
 		this.id = 0;
@@ -81,11 +88,13 @@ public class Player implements Steerable<Vector2>
 		{
 			// TODO: This is a special case for playable clients.
 			setupPhysics();
+			this.type = ACTOR_PLAYER;
 		}
 		else
 		{
 			// Agent
 			this.id = (byte) (int) (Math.random() * 100.0f + 1.0f);
+			this.type = ACTOR_AGENT;
 		}
 		
 		//steeringBehavior = new Seek<Vector2>(this);
@@ -115,6 +124,19 @@ public class Player implements Steerable<Vector2>
 		fixtureDef.density = 0.5f; 
 		fixtureDef.friction = 0.4f;
 		fixtureDef.restitution = 0.6f; // Make it bounce a little bit
+		
+		if (this.connection != null)
+		{
+			fixtureDef.filter.categoryBits = StarshipServer.CATEGORY_PLAYER;
+			fixtureDef.filter.maskBits = StarshipServer.MASK_PLAYER;
+			fixtureDef.filter.groupIndex = 0;
+		}
+		else
+		{
+			fixtureDef.filter.categoryBits = StarshipServer.CATEGORY_ENEMY;
+			fixtureDef.filter.maskBits = StarshipServer.MASK_ENEMY;
+			fixtureDef.filter.groupIndex = 0;
+		}
 
 		// Create our fixture and attach it to the body
 		//Fixture fixture = 
@@ -411,5 +433,9 @@ public class Player implements Steerable<Vector2>
 		outVector.x = -(float)Math.sin(angle);
         outVector.y = (float)Math.cos(angle);
         return outVector;
+	}
+
+	public byte getType() {
+		return type;
 	}
 }

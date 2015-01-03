@@ -21,6 +21,10 @@ public class ClientShip
 	public Weapon weapon;
 	
 	private ConnectionHandler connectionHandler = null;
+	private byte type;
+	
+	private static final byte ACTOR_PLAYER = 0;
+	private static final byte ACTOR_AGENT = 1;
 	
 	public ClientShip(int id, ConnectionHandler connection)
 	{
@@ -84,5 +88,30 @@ public class ClientShip
 	public Vector2 getPosition()
 	{
 		return this.position;
+	}
+
+	public byte getType() 
+	{
+		return type;
+	}
+
+	public void setType(byte type) 
+	{
+		this.img.dispose();
+		
+		switch (type)
+		{
+		case ACTOR_PLAYER:
+		{
+			this.img = new Texture("sampleShip2.png");
+			break;
+		}
+		case ACTOR_AGENT:
+		{
+			this.img = new Texture("sampleShip3.png");
+			break;
+		}
+		}
+		this.type = type;
 	}
 }

@@ -61,6 +61,7 @@ public class Game extends ApplicationAdapter
 			
 		clientInput = new ClientInput(ship);
 		Gdx.input.setInputProcessor(clientInput);
+
 	}
 
 	@Override
@@ -134,17 +135,18 @@ public class Game extends ApplicationAdapter
 				// Check if position data.
 				if (Byte.valueOf(list[0]) == Packet.POSITION)
 				{
-					int numPlayers = (list.length - 1)/4;
+					int numPlayers = (list.length - 1)/5;
 					//System.out.println("numplayers: " + numPlayers);
 					//System.err.println("position data");
 					
 					for (int i = 0; i < numPlayers; i++)
 					{
 						
-						byte pid = Byte.valueOf(list[i * 4 + 1]).byteValue();
-						float x = Float.valueOf(list[i * 4 + 2]).floatValue();
-						float y = Float.valueOf(list[i * 4 + 3]).floatValue();
-						float dir = Float.valueOf(list[i * 4 + 4]).floatValue();
+						byte pid = Byte.valueOf(list[i * 5 + 1]).byteValue();
+						byte type = Byte.valueOf(list[i * 5 + 2]).byteValue();
+						float x = Float.valueOf(list[i * 5 + 3]).floatValue();
+						float y = Float.valueOf(list[i * 5 + 4]).floatValue();
+						float dir = Float.valueOf(list[i * 5 + 5]).floatValue();
 											
 						// Check if data from server is intended for me.
 						if (this.id == pid)
@@ -154,6 +156,7 @@ public class Game extends ApplicationAdapter
 							
 							ship.setPosition(x, y);
 							ship.setDirection(dir);
+							ship.setType(type);
 						}
 						else
 						{
@@ -167,6 +170,7 @@ public class Game extends ApplicationAdapter
 								ClientShip player = new ClientShip(pid, null);
 								player.setPosition(x, y);
 								player.setDirection(dir);
+								player.setType(type);
 								ships.put(pid, player);
 								
 							}
@@ -178,6 +182,7 @@ public class Game extends ApplicationAdapter
 								ClientShip player = ships.get(pid);
 								player.setPosition(x, y);
 								player.setDirection(dir);
+								player.setType(type);
 								ships.put(pid, player);
 							}
 						}

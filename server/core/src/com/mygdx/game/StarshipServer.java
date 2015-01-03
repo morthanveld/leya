@@ -42,6 +42,18 @@ public class StarshipServer extends ApplicationAdapter
 	
 	private Array<RadiusProximity<Vector2>> proximities;
 	
+	static final short CATEGORY_PLAYER = 0x0001;
+	static final short CATEGORY_ENEMY =  0x0002;
+	static final short CATEGORY_BULLET = 0x0004;
+	static final short CATEGORY_WORLD =  0x0008;
+	
+	static final short MASK_PLAYER = CATEGORY_ENEMY | CATEGORY_WORLD;
+	static final short MASK_ENEMY = CATEGORY_ENEMY | CATEGORY_PLAYER | CATEGORY_WORLD | CATEGORY_BULLET;
+	static final short MASK_BULLET = CATEGORY_PLAYER | CATEGORY_ENEMY | CATEGORY_WORLD;
+	static final short MASK_WORLD = -1;
+	
+	private Array<SpawnLocation> spawnLocations;
+	
 	public void create () 
 	{
 		//System.out.close();
@@ -53,9 +65,14 @@ public class StarshipServer extends ApplicationAdapter
 		
 		players = new Array<Player>();
 		projectileManager = new ProjectileManager(world);
+		spawnLocations = new Array<SpawnLocation>();
+		
+		spawnLocations.add(new SpawnLocation(this, new Vector2()));
 				
 		this.proximities = new Array<RadiusProximity<Vector2>>();
-		createAiTest();
+		//createAiTest();
+		
+		
 		
 		// Start listening on incoming clients.
 		listen();
@@ -65,32 +82,37 @@ public class StarshipServer extends ApplicationAdapter
 	{	
 		for (int i = 0; i < 20; i++)
 		{
-			Player p = new Player(this, null);
-			p.setPosition(new Vector2((float)Math.random() * 400.0f, (float)Math.random() * 400.0f));
-			p.setupPhysics();
-			
-			// Wander behavior.
-			Wander<Vector2> w = new Wander<Vector2>(p);
-			w.setFaceEnabled(false);
-			w.setWanderOffset(500);
-			w.setWanderOrientation(10);
-			w.setWanderRadius(1000);
-			w.setWanderRate(MathUtils.PI * 10);
-					
-			// Collision avoidance behavior.
-			RadiusProximity<Vector2> rp = new RadiusProximity<Vector2>(p, players, 300.0f);
-			this.proximities.add(rp);
-			CollisionAvoidance<Vector2> collisionAvoidanceSB = new CollisionAvoidance<Vector2>(p, rp);
-			
-			// Add behaviors.
-			PrioritySteering<Vector2> prioritySteeringSB = new PrioritySteering<Vector2>(p, 0.0001f);
-			prioritySteeringSB.add(collisionAvoidanceSB);
-			prioritySteeringSB.add(w);
-			
-			p.setSteeringBehavior(prioritySteeringSB);
-			
-			players.add(p);
+			createEnemy(new Vector2((float)Math.random() * 400.0f, (float)Math.random() * 400.0f));
 		}
+	}
+	
+	public void createEnemy(Vector2 position)
+	{
+		Player p = new Player(this, null);
+		p.setPosition(new Vector2(position));
+		p.setupPhysics();
+		
+		// Wander behavior.
+		Wander<Vector2> w = new Wander<Vector2>(p);
+		w.setFaceEnabled(false);
+		w.setWanderOffset(500);
+		w.setWanderOrientation(10);
+		w.setWanderRadius(1000);
+		w.setWanderRate(MathUtils.PI * 10);
+				
+		// Collision avoidance behavior.
+		RadiusProximity<Vector2> rp = new RadiusProximity<Vector2>(p, players, 300.0f);
+		this.proximities.add(rp);
+		CollisionAvoidance<Vector2> collisionAvoidanceSB = new CollisionAvoidance<Vector2>(p, rp);
+		
+		// Add behaviors.
+		PrioritySteering<Vector2> prioritySteeringSB = new PrioritySteering<Vector2>(p, 0.0001f);
+		prioritySteeringSB.add(collisionAvoidanceSB);
+		prioritySteeringSB.add(w);
+		
+		p.setSteeringBehavior(prioritySteeringSB);
+		
+		players.add(p);
 	}
 	
 	public World getWorld()
@@ -105,6 +127,7 @@ public class StarshipServer extends ApplicationAdapter
 		
 		updateInput();
 		updatePhysics(dt);
+		updateGame(dt);		
 		
 		ioTimer += dt;
 		if (ioTimer > (1.0 / 60.0f))
@@ -132,7 +155,7 @@ public class StarshipServer extends ApplicationAdapter
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		debugRenderer.render(world, camera.combined);
 	}
-	
+		
 	/*
 	 * Game Update
 	 * Physics and AI.
@@ -154,6 +177,14 @@ public class StarshipServer extends ApplicationAdapter
 		projectileManager.updatePhysics(dt);
 	}
 	
+	public void updateGame(float dt)
+	{
+		for (SpawnLocation spawnLocation : this.spawnLocations)
+		{
+			spawnLocation.update(dt);
+		}
+	}
+	
 	public void updateOutput()
 	{
 		StringBuffer a = new StringBuffer();
@@ -166,6 +197,8 @@ public class StarshipServer extends ApplicationAdapter
 				// Compile data to send.
 				a.append(";");
 				a.append(p.getId());
+				a.append(";");
+				a.append(p.getType());
 				a.append(";");
 				a.append(p.getPosition().x);
 				a.append(";");
@@ -200,6 +233,13 @@ public class StarshipServer extends ApplicationAdapter
 		if (Gdx.input.isKeyPressed(Keys.ESCAPE))
 		{
 			Gdx.app.exit();
+		}
+		if (Gdx.input.isKeyPressed(Keys.NUM_1))
+		{
+			for (SpawnLocation spawnLocation : this.spawnLocations)
+			{
+				spawnLocation.spawn(4, 3);
+			}
 		}
 	}
 	

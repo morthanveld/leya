@@ -32,11 +32,12 @@ public class Projectile
 		bodyDef.type = BodyType.DynamicBody;
 		// Set our body's starting position in the world
 		bodyDef.position.set(this.position);
-		bodyDef.linearVelocity.set(this.velocity);
+		//bodyDef.linearVelocity.set(new Vector2(0, 0));
 		bodyDef.fixedRotation = true;
 
 		// Create our body in the world using our body definition
 		this.body = world.createBody(bodyDef);
+		
 
 		// Create a circle shape and set its radius to 6
 		CircleShape circle = new CircleShape();
@@ -45,14 +46,22 @@ public class Projectile
 		// Create a fixture definition to apply our shape to
 		FixtureDef fixtureDef = new FixtureDef();
 		fixtureDef.shape = circle;
-		fixtureDef.density = 0.5f; 
+		fixtureDef.density = 0.1f; 
 		fixtureDef.friction = 0.4f;
 		fixtureDef.restitution = 0.6f; // Make it bounce a little bit
+		
+		fixtureDef.filter.categoryBits = StarshipServer.CATEGORY_BULLET;
+		fixtureDef.filter.maskBits = StarshipServer.MASK_BULLET;
+		fixtureDef.filter.groupIndex = 0;
 
 		// Create our fixture and attach it to the body
 		//Fixture fixture = 
 		body.createFixture(fixtureDef);
-
+		
+		//this.body.setLinearVelocity(new Vector2(0,10000000000.0f));
+		this.body.applyForceToCenter(new Vector2(0, 1000000000.0f), true);
+		//this.body.setLinearDamping(1.0f);
+				
 		// Remember to dispose of any shapes after you're done with them!
 		// BodyDef and FixtureDef don't need disposing, but shapes do.
 		circle.dispose();

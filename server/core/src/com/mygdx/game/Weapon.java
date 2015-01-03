@@ -20,9 +20,9 @@ public class Weapon
 	{
 		player = p;
 		target = new Vector2();
-		cooldown = 0.5f;
+		cooldown = 0.2f;
 		timer = 0.0f;
-		power = 100.0f * 10.0f;
+		power = 100.0f * 1000000000.0f;
 		projectileLife = 10.0f;
 		
 		weaponOffset = new Vector2(0.0f, 32.0f);
@@ -47,7 +47,8 @@ public class Weapon
 			Vector2 dir = target.sub(weaponPosition);
 			dir.nor();
 			dir.scl(power);
-			dir.add(player.getVelocity());
+			//dir.add(player.getLinearVelocity());
+			
 			
 			// Create projectile.
 			player.getProjectileManager().create(weaponPosition, dir, projectileLife);
