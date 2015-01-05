@@ -25,7 +25,7 @@ import com.mygdx.game.Utils;
 
 public class StarshipServer extends ApplicationAdapter 
 {
-	private Array<Player> players;
+	private Array<Entity> players;
 	private ProjectileManager projectileManager;
 	
 	float ioTimer = 0.0f;
@@ -59,12 +59,12 @@ public class StarshipServer extends ApplicationAdapter
 	{
 		//System.out.close();
 		Box2D.init();
-		world = new World(new Vector2(0.0f, 0.0f), true);
+		world = WorldSingleton.getInstance().getWorld();
 		
 		camera = new OrthographicCamera(Utils.downScale(3280), Utils.downScale(1720));
 		debugRenderer = new Box2DDebugRenderer();
 		
-		players = new Array<Player>();
+		players = new Array<Entity>();
 		projectileManager = new ProjectileManager(world);
 		spawnLocations = new Array<SpawnLocation>();
 		
@@ -72,8 +72,6 @@ public class StarshipServer extends ApplicationAdapter
 				
 		this.proximities = new Array<RadiusProximity<Vector2>>();
 		createAiTest();
-		
-		
 		
 		// Start listening on incoming clients.
 		listen();
@@ -90,12 +88,15 @@ public class StarshipServer extends ApplicationAdapter
 	
 	public void createEnemy(Vector2 position)
 	{
-		Player p = new Player(this, null);
+		Enemy e = new Enemy();
+		e.createBody(position);
+		/*
 		p.setPosition(new Vector2(position));
 		p.setupPhysics();
+		*/
 		
 		// Wander behavior.
-		Wander<Vector2> w = new Wander<Vector2>(p);
+		Wander<Vector2> w = new Wander<Vector2>(e);
 		w.setFaceEnabled(false);
 		w.setWanderOffset(Utils.downScale(100));
 		w.setWanderOrientation(Utils.downScale(10));
@@ -103,18 +104,18 @@ public class StarshipServer extends ApplicationAdapter
 		w.setWanderRate(MathUtils.PI * 100);
 				
 		// Collision avoidance behavior.
-		RadiusProximity<Vector2> rp = new RadiusProximity<Vector2>(p, players, Utils.downScale(300.0f));
+		RadiusProximity<Vector2> rp = new RadiusProximity<Vector2>(e, players, Utils.downScale(300.0f));
 		this.proximities.add(rp);
-		CollisionAvoidance<Vector2> collisionAvoidanceSB = new CollisionAvoidance<Vector2>(p, rp);
+		CollisionAvoidance<Vector2> collisionAvoidanceSB = new CollisionAvoidance<Vector2>(e, rp);
 		
 		// Add behaviors.
-		PrioritySteering<Vector2> prioritySteeringSB = new PrioritySteering<Vector2>(p, 0.0001f);
+		PrioritySteering<Vector2> prioritySteeringSB = new PrioritySteering<Vector2>(e, 0.0001f);
 		prioritySteeringSB.add(collisionAvoidanceSB);
 		prioritySteeringSB.add(w);
 		
-		p.setSteeringBehavior(prioritySteeringSB);
+		e.setSteeringBehavior(prioritySteeringSB);
 		
-		players.add(p);
+		players.add(e);
 	}
 	
 	public World getWorld()
@@ -153,8 +154,8 @@ public class StarshipServer extends ApplicationAdapter
 			e.printStackTrace();
 		}
 		
-		//Gdx.gl.glClearColor(0, 0, 0, 1);
-		//Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		Gdx.gl.glClearColor(0, 0, 0, 1);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		debugRenderer.render(world, camera.combined);
 	}
 		
@@ -166,13 +167,20 @@ public class StarshipServer extends ApplicationAdapter
 	{
 		world.step(dt, VELOCITY_ITERATIONS, POSITION_ITERATIONS);
 		
-		for (Player p : players)
+		for (Entity e : players)
 		{
-			// Update player ship.
-			p.updatePhysics(dt);
-			
-			// Update AI.
-			p.updateAi(dt);
+			if (e instanceof Enemy)
+			{
+				((Enemy) e).updateAi(dt);
+			}
+			if (e instanceof Player)
+			{
+				((Player) e).update(dt);
+			}
+			if (e instanceof Ship)
+			{
+				((Ship) e).updatePhysics(dt);
+			}					
 		}
 		
 		// Update projectiles.
@@ -192,21 +200,26 @@ public class StarshipServer extends ApplicationAdapter
 		StringBuffer a = new StringBuffer();
 		a.append(Packet.POSITION);
 		
-		for (Player p : players)
+		for (Entity e : players)
 		{
-			if (p.getId() != 0)
+			if (e instanceof Ship)
 			{
-				// Compile data to send.
-				a.append(";");
-				a.append(p.getId());
-				a.append(";");
-				a.append(p.getType());
-				a.append(";");
-				a.append(p.getPosition().x);
-				a.append(";");
-				a.append(p.getPosition().y);
-				a.append(";");
-				a.append(p.getDirection());
+				Ship s = (Ship) e;
+
+				if (s.getId() != 0)
+				{
+					// Compile data to send.
+					a.append(";");
+					a.append(s.getId());
+					a.append(";");
+					a.append(s.getType());
+					a.append(";");
+					a.append(s.getPosition().x);
+					a.append(";");
+					a.append(s.getPosition().y);
+					a.append(";");
+					a.append(s.getDirection());
+				}
 			}
 		}
 		
@@ -217,15 +230,20 @@ public class StarshipServer extends ApplicationAdapter
 		Packet projectilePacket = new Packet(projectileData.getBytes());
 
 		// Add position packet to players connection.
-		for (Player p : players)
+		for (Entity e : players)
 		{
-			p.addPacket(positionPacket);
-			
-			//System.out.println("dirty projs: " + projectileManager.getDirtySize());
-			
-			if (projectileManager.getDataSize() > 0)
+			if (e instanceof Player)
 			{
-				p.addPacket(projectilePacket);
+				Player p = (Player) e;
+			
+				p.addPacket(positionPacket);
+			
+				//System.out.println("dirty projs: " + projectileManager.getDirtySize());
+
+				if (projectileManager.getDataSize() > 0)
+				{
+					p.addPacket(projectilePacket);
+				}
 			}
 		}
 	}
@@ -254,12 +272,15 @@ public class StarshipServer extends ApplicationAdapter
 	public void registerPlayer(ConnectionHandler connection)
 	{
 		Player p = new Player(this, connection);
+		p.createBody(new Vector2(0.0f, 0.0f));
 		players.add(p);
 		
+		/*
 		for (Player a : players)
 		{
 			//a.setSteeringBehavior(new Pursue<Vector2>(a, p));
 		}
+		*/
 	}
 	
 	public void unregisterPlayer(Player p)
@@ -268,7 +289,8 @@ public class StarshipServer extends ApplicationAdapter
 		players.removeValue(p, false);
 	}
 
-	public ProjectileManager getProjectileManager() {
+	public ProjectileManager getProjectileManager() 
+	{
 		return projectileManager;
 	}
 }

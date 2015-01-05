@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.Utils;
+import com.mygdx.game.Entity;
 
 public class ClientShip
 {
@@ -23,9 +24,6 @@ public class ClientShip
 	
 	private ConnectionHandler connectionHandler = null;
 	private byte type;
-	
-	private static final byte ACTOR_PLAYER = 0;
-	private static final byte ACTOR_AGENT = 1;
 	
 	public ClientShip(int id, ConnectionHandler connection)
 	{
@@ -100,19 +98,15 @@ public class ClientShip
 	{
 		this.img.dispose();
 		
-		switch (type)
-		{
-		case ACTOR_PLAYER:
+		if (type == Entity.ENTITY_PLAYER)
 		{
 			this.img = new Texture("sampleShip2.png");
-			break;
 		}
-		case ACTOR_AGENT:
+		else if(type == Entity.ENTITY_ENEMY)
 		{
 			this.img = new Texture("sampleShip3.png");
-			break;
 		}
-		}
+		
 		this.type = type;
 	}
 }

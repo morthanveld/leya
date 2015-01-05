@@ -61,6 +61,8 @@ public class Game extends ApplicationAdapter
 		projectileManager = new ProjectileManager();
 			
 		clientInput = new ClientInput(ship);
+		
+		ships.put(id, ship);
 		Gdx.input.setInputProcessor(clientInput);
 
 	}
@@ -81,8 +83,10 @@ public class Game extends ApplicationAdapter
 		space.update(dt);
 		space.render(camera, ship);
 		
+		/*
 		ship.update(dt);
 		ship.render(camera);
+		*/
 				
 		for(ClientShip player : ships.values())
 		{
@@ -91,7 +95,6 @@ public class Game extends ApplicationAdapter
 		}
 		
 		// Render projectiles.
-		
 		projectileManager.updatePhysics(dt);
 		projectileManager.render(camera);
 
@@ -133,7 +136,7 @@ public class Game extends ApplicationAdapter
 				Pattern pattern =  Pattern.compile(";");
 				String[] list = pattern.split(a.subSequence(0, a.length()));
 				
-				System.out.println(a);
+				//System.out.println(a);
 				
 				// Check if position data.
 				if (Byte.valueOf(list[0]) == Packet.POSITION)
@@ -152,22 +155,22 @@ public class Game extends ApplicationAdapter
 						float dir = Float.valueOf(list[i * 5 + 5]).floatValue();
 											
 						// Check if data from server is intended for me.
-						if (this.id == pid)
+						//if (this.id == pid)
 						{
 							// Update position and direction.
 							//System.out.println("client: update me player");
 							
-							ship.setPosition(x, y);
-							ship.setDirection(dir);
-							ship.setType(type);
+							//ship.setPosition(x, y);
+							//ship.setDirection(dir);
+							//ship.setType(type);
 						}
-						else
+						//else
 						{
 							// Other player data.
 							if (!ships.containsKey(pid))
 							{
 								// Create new player.
-								System.out.println("client: new other player data                                   !!!!!!!!!!!!!!!!!!   " + pid + "\t" + this.id);
+//								System.out.println("client: new other player data                                   !!!!!!!!!!!!!!!!!!   " + pid + "\t" + this.id);
 								
 								
 								ClientShip player = new ClientShip(pid, null);
@@ -180,7 +183,7 @@ public class Game extends ApplicationAdapter
 							else
 							{
 								// Update existing player.
-								//System.out.println("client: update other player");
+								//System.out.println("client: update other player " + pid + "\t" + x + "\t" + y);
 								
 								ClientShip player = ships.get(pid);
 								player.setPosition(x, y);
