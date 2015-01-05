@@ -196,7 +196,7 @@ public class Game extends ApplicationAdapter
 				}
 				if (Byte.valueOf(list[0]) == Packet.PROJECTILE)
 				{
-					int numProjectiles = (list.length - 1)/5;
+					int numProjectiles = (list.length - 1)/3;
 					
 					//System.err.println(a);
 					
@@ -215,13 +215,14 @@ public class Game extends ApplicationAdapter
 					
 					for (int i = 0; i < numProjectiles; i++)
 					{
-						int pid = Integer.valueOf(list[i * 5 + 1]).intValue();
-						float x = Utils.upScale(Float.valueOf(list[i * 5 + 2]).floatValue());
-						float y = Utils.upScale(Float.valueOf(list[i * 5 + 3]).floatValue());
-						float vx = Utils.upScale(Float.valueOf(list[i * 5 + 4]).floatValue());
+						int pid = Integer.valueOf(list[i * 3 + 1]).intValue();
+						float x = Utils.upScale(Float.valueOf(list[i * 3 + 2]).floatValue());
+						float y = Utils.upScale(Float.valueOf(list[i * 3 + 3]).floatValue());
+						/*float vx = Utils.upScale(Float.valueOf(list[i * 5 + 4]).floatValue());
 						float vy = Utils.upScale(Float.valueOf(list[i * 5 + 5]).floatValue());
+						*/
 						
-						projectileManager.addProjectile(pid, x, y, vx, vy);
+						projectileManager.addProjectile(pid, x, y, x, y);
 					}
 				}
 			}

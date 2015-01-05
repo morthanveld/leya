@@ -169,8 +169,8 @@ public class Player extends Ship// implements Steerable<Vector2>
 				else if (type == Packet.IO_MOUSE)
 				{
 					// Mouse input from player.
-					float x = Float.valueOf(list[2]).floatValue();
-					float y = Float.valueOf(list[3]).floatValue();
+					float x = Utils.downScale(Float.valueOf(list[2]).floatValue());
+					float y = Utils.downScale(Float.valueOf(list[3]).floatValue());
 					int button = Integer.valueOf(list[4]).intValue();
 					
 					weapon.setTarget(new Vector2(x, y));

@@ -22,10 +22,10 @@ public class Weapon
 		target = new Vector2();
 		cooldown = 0.2f;
 		timer = 0.0f;
-		power = 100.0f * 1000000000.0f;
+		power = 5.0f;
 		projectileLife = 10.0f;
 		
-		weaponOffset = new Vector2(0.0f, 32.0f);
+		weaponOffset = new Vector2(0.0f, Utils.downScale(32.0f));
 	}
 	
 	void update(float dt)

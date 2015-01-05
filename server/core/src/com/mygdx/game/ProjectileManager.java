@@ -78,10 +78,11 @@ public class ProjectileManager
 			projectileData.append(p.position.x);
 			projectileData.append(";");
 			projectileData.append(p.position.y);
-			projectileData.append(";");
+/*			projectileData.append(";");
 			projectileData.append(p.velocity.x);
 			projectileData.append(";");
 			projectileData.append(p.velocity.y);
+			*/
 		}
 	}
 	

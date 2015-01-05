@@ -32,7 +32,7 @@ public class Projectile
 		bodyDef.type = BodyType.DynamicBody;
 		// Set our body's starting position in the world
 		bodyDef.position.set(this.position);
-		//bodyDef.linearVelocity.set(new Vector2(0, 0));
+		bodyDef.linearVelocity.set(this.velocity);
 		bodyDef.fixedRotation = true;
 
 		// Create our body in the world using our body definition
@@ -41,7 +41,7 @@ public class Projectile
 
 		// Create a circle shape and set its radius to 6
 		CircleShape circle = new CircleShape();
-		circle.setRadius(6.0f);
+		circle.setRadius(Utils.downScale(6.0f));
 
 		// Create a fixture definition to apply our shape to
 		FixtureDef fixtureDef = new FixtureDef();
@@ -59,7 +59,7 @@ public class Projectile
 		body.createFixture(fixtureDef);
 		
 		//this.body.setLinearVelocity(new Vector2(0,10000000000.0f));
-		this.body.applyForceToCenter(new Vector2(0, 1000000000.0f), true);
+		//this.body.applyForceToCenter(new Vector2(0, 1000000000.0f), true);
 		//this.body.setLinearDamping(1.0f);
 				
 		// Remember to dispose of any shapes after you're done with them!
