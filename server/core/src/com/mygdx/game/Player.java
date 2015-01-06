@@ -2,14 +2,13 @@ package com.mygdx.game;
 
 import java.util.regex.Pattern;
 
-import com.badlogic.gdx.ai.steer.Steerable;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 
-public class Player extends Ship// implements Steerable<Vector2>
+public class Player extends Ship
 {
 	private ConnectionHandler connection = null;
 	private StarshipServer server = null;
@@ -29,13 +28,13 @@ public class Player extends Ship// implements Steerable<Vector2>
 		this.connection = connection;
 		this.server = server;
 		
-		// Setup speeds for AI.
 		super.setBoundingRadius(Utils.downScale(32.0f));
 		super.setMaxLinearSpeed(1000.0f);
 		super.setMaxLinearAcceleration(1000.0f);
 		super.setMaxAngularSpeed(1000.0f);
 		super.setMaxAngularAcceleration(1000.0f);
 		
+		// Setup thrusters.
 		super.setAxialThrustPower(0.03f);
 		super.setLongitudinalThrustPower(0.1f);
 		super.setLateralThrustPower(0.1f);
@@ -125,38 +124,27 @@ public class Player extends Ship// implements Steerable<Vector2>
 				if (super.getId() == 0)
 				{
 					super.setId(pid);
-					//id = pid;
 				}
 				
 				if (type == Packet.IO_KEYBOARD)
 				{
-					// Keyboard input from player.
-										
 					super.setLongitudinalThrust(0.0f);
 					super.setAxialThrust(0.0f);
-//					acceleration.set(0.0f, 0.0f);
-					//angularAcceleration = 0.0f;
 					
 					if (Byte.valueOf(list[KEY_A + 2]).byteValue() > 0)
 					{
-						//angularAcceleration = turnPower;
 						super.setAxialThrust(super.getAxialThrustPower());
 					}
 					if (Byte.valueOf(list[KEY_D + 2]).byteValue() > 0)
 					{
-						//angularAcceleration = -turnPower;
 						super.setAxialThrust(-super.getAxialThrustPower());
 					}
 					if (Byte.valueOf(list[KEY_W + 2]).byteValue() > 0)
 					{
-						//acceleration.set(0.0f, drivePower);
-						//acceleration.rotate(direction);
 						super.setLongitudinalThrust(super.getLongitudinalThrustPower());
 					}
 					if (Byte.valueOf(list[KEY_S + 2]).byteValue() > 0)
 					{
-						//acceleration.set(0.0f, -drivePower);
-						//acceleration.rotate(direction);
 						super.setLongitudinalThrust(-super.getLongitudinalThrustPower());
 					}
 					if (Byte.valueOf(list[KEY_Q + 2]).byteValue() > 0)

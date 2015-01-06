@@ -10,7 +10,7 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 
-public class Enemy extends Ship// implements Steerable<Vector2>
+public class Enemy extends Ship
 {
 	private SteeringBehavior<Vector2> steeringBehavior = null;
 	private static final SteeringAcceleration<Vector2> steeringOutput = new SteeringAcceleration<Vector2>(new Vector2());
@@ -23,8 +23,8 @@ public class Enemy extends Ship// implements Steerable<Vector2>
 
 		// Setup speeds for AI.
 		super.setBoundingRadius(Utils.downScale(32.0f));
-		super.setMaxLinearSpeed(0.1f);
-		super.setMaxLinearAcceleration(0.3f);
+		super.setMaxLinearSpeed(0.01f);
+		super.setMaxLinearAcceleration(0.05f);
 		super.setMaxAngularSpeed(0.1f);
 		super.setMaxAngularAcceleration(0.01f);
 		

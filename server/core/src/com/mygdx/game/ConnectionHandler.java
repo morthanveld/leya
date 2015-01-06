@@ -13,6 +13,8 @@ public class ConnectionHandler implements Runnable
 	private ArrayDeque<Packet> packetOutbox;
 	private ArrayDeque<Packet> packetInbox; 
 	
+	private BufferedReader inputBuffer = null;
+	
 	private final Object outboxLock = new Object();
 	private final Object inboxLock = new Object();
 	
@@ -21,6 +23,7 @@ public class ConnectionHandler implements Runnable
 	public ConnectionHandler(Socket socket)
 	{
 		clientSocket = socket;
+		inputBuffer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream())); 
 		
 		synchronized (outboxLock) 
 		{
@@ -113,12 +116,12 @@ public class ConnectionHandler implements Runnable
 			if (clientSocket.getInputStream().available() > 0)
 			{
 				// TODO: Create the buffer once instead of every read??!!
-				BufferedReader buffer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream())); 
+				//BufferedReader buffer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream())); 
 
 				synchronized (inboxLock) 
 				{
 					// Read data from client.
-					String d = buffer.readLine();
+					String d = inputBuffer.readLine();
 					packetInbox.add(new Packet(d.getBytes()));
 				}
 			}

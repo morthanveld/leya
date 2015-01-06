@@ -6,7 +6,7 @@ import com.badlogic.gdx.utils.Array;
 
 public class ProjectileManager
 {
-	private Array<Projectile> projectileArray;
+	private Array<Bullet> projectileArray;
 	private int projectileId = 1;
 	
 	private int dirtySize = 0;
@@ -23,7 +23,7 @@ public class ProjectileManager
 		this.world = world;
 		synchronized (projectileArrayLock)
 		{
-			projectileArray = new Array<Projectile>();
+			projectileArray = new Array<Bullet>();
 		}
 		
 		synchronized (projectileDataLock)
@@ -45,20 +45,21 @@ public class ProjectileManager
 		{
 			while (i < projectileArray.size)
 			{
-				Projectile p = projectileArray.get(i);
-				p.life -= dt;
+				Bullet p = projectileArray.get(i);
+				p.update(dt);
 
-				if (p.life < 0.0f)
+				if (p.isScheduledDestruction())
 				{
 					// Projectile dead.
 					//addProjectileData(p);
+					//p.destroy();
 					p.destroy();
 					projectileArray.removeIndex(i);
 					continue;
 				}
 
 				// Read position from simulation.
-				p.position.set(p.getBody().getPosition());
+				//p.position.set(p.getBody().getPosition());
 				
 				// Add projectile data to packet.
 				addProjectileData(p);
@@ -68,16 +69,17 @@ public class ProjectileManager
 		}
 	}
 	
-	private void addProjectileData(Projectile p)
+	private void addProjectileData(Bullet p)
 	{
 		synchronized (projectileDataLock) 
 		{		
+			Vector2 position = p.getPosition();
 			projectileData.append(";");
-			projectileData.append(p.id);
+			projectileData.append(p.getId());
 			projectileData.append(";");
-			projectileData.append(p.position.x);
+			projectileData.append(position.x);
 			projectileData.append(";");
-			projectileData.append(p.position.y);
+			projectileData.append(position.y);
 /*			projectileData.append(";");
 			projectileData.append(p.velocity.x);
 			projectileData.append(";");
@@ -128,7 +130,8 @@ public class ProjectileManager
 	
 	public void create(Vector2 pos, Vector2 vel, float l)
 	{	
-		Projectile p = new Projectile(world, projectileId++, pos, vel, l);
+		Bullet p = new Bullet(world, projectileId++);//, pos, vel, l);
+		p.createBody(pos, vel);
 		
 		synchronized (projectileArrayLock)
 		{

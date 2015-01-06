@@ -3,6 +3,8 @@ package com.mygdx.starship;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
@@ -25,6 +27,8 @@ public class ClientShip
 	private ConnectionHandler connectionHandler = null;
 	private byte type;
 	
+	private ShapeRenderer shape = null;
+	
 	public ClientShip(int id, ConnectionHandler connection)
 	{
 		connectionHandler = connection;
@@ -40,6 +44,8 @@ public class ClientShip
 		direction = 0.0f;
 		
 		scale = new Vector3(0.5f, 0.5f, 0.5f);		
+		
+		shape = new ShapeRenderer();
 	}
 	
 	public ConnectionHandler getConnectionHandler()
@@ -61,12 +67,22 @@ public class ClientShip
 		Vector3 p = new Vector3();
 		p.set(position, 0.0f);
 		Matrix4 transform = new Matrix4(p, orientation, scale);
+		
+		
 		batch.setTransformMatrix(transform);
-
 		batch.setProjectionMatrix(camera.combined);
 		batch.begin();
 		batch.draw(img, -img.getWidth() * 0.5f, -img.getHeight() * 0.5f);
 		batch.end();
+		
+		/*
+		shape.setTransformMatrix(transform);
+		shape.setProjectionMatrix(camera.combined);
+		shape.begin(ShapeType.Filled);
+		shape.setColor(1, 1, 1, 1);	
+		shape.circle(0.0f, 0.0f, 3.0f);
+		shape.end();
+		*/
 	}
 	
 	public void setPosition(float x, float y)

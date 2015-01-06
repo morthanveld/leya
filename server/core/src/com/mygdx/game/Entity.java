@@ -27,10 +27,31 @@ public class Entity implements Steerable<Vector2>
 	private float maxAngularSpeed = 0.1f; //100000.0f;
 	private float maxAngularAcceleration = 0.01f; //3000000.0f;
 	
+	private boolean scheduleDestruction = false;
+	
+	// TODO: MUST FIX DESTROY OF ENTITY
 	public Entity(short type)
 	{
 		this.type = type;
 		this.world = WorldSingleton.getInstance().getWorld();
+	}
+	
+	public void destroy()
+	{
+		if (body != null)
+		{
+			this.world.destroyBody(this.body);
+		}
+	}
+	
+	public void scheduleDestruction()
+	{
+		this.scheduleDestruction = true;
+	}
+	
+	public boolean isScheduledDestruction()
+	{
+		return this.scheduleDestruction;
 	}
 	
 	public void createBody(BodyDef bodyDef, FixtureDef fixtureDef)
@@ -39,6 +60,7 @@ public class Entity implements Steerable<Vector2>
 		{
 			this.body = this.world.createBody(bodyDef);
 			this.body.createFixture(fixtureDef);
+			this.body.setUserData(this);
 		}
 		else
 		{

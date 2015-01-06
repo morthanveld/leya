@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.net.Socket;
 import com.badlogic.gdx.net.SocketHints;
+import com.mygdx.game.Event;
 import com.mygdx.game.Utils;
 
 public class Game extends ApplicationAdapter 
@@ -37,6 +38,9 @@ public class Game extends ApplicationAdapter
 	private float ioTimer = 0.0f;
 	
 	private ClientInput clientInput = null;
+	
+	private float inboxSum = 0.0f;
+	private float outboxSum = 0.0f;
 	
 	@Override
 	public void create () 
@@ -70,7 +74,10 @@ public class Game extends ApplicationAdapter
 	@Override
 	public void render() 
 	{
+		long start = System.currentTimeMillis();
+		inboxSum += connectionHandler.getInboxSize();
 		updateInput();
+		
 		
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -79,6 +86,7 @@ public class Game extends ApplicationAdapter
 		camera.update();
 			
 		float dt = Math.min(Gdx.graphics.getDeltaTime(), 1.0f / 60.0f);
+		//dt = 1.0f / 120.0f;
 
 		space.update(dt);
 		space.render(camera, ship);
@@ -98,6 +106,7 @@ public class Game extends ApplicationAdapter
 		projectileManager.updatePhysics(dt);
 		projectileManager.render(camera);
 
+		outboxSum += connectionHandler.getOutboxSize();
 		
 		// Send output.
 		ioTimer += dt;
@@ -109,7 +118,13 @@ public class Game extends ApplicationAdapter
 		
 		if (Gdx.graphics.getFrameId() % 60 == 0)
 		{
-			System.out.println("FPS: " + Gdx.graphics.getFramesPerSecond());
+			System.out.println("FPS: " + Gdx.graphics.getFramesPerSecond() + 
+					"\tINBOX: " + inboxSum/60.0f + 
+					"\tOUTBOX: " + outboxSum/60.0f +
+					"\tCPU: " + (System.currentTimeMillis() - start)
+					);
+			inboxSum = 0;
+			outboxSum = 0;
 		}
 	}
 	
@@ -143,7 +158,7 @@ public class Game extends ApplicationAdapter
 				{
 					int numPlayers = (list.length - 1)/5;
 					//System.out.println("numplayers: " + numPlayers);
-					//System.err.println("position data");
+					//System.err.println("position data " + a);
 					
 					for (int i = 0; i < numPlayers; i++)
 					{
@@ -197,21 +212,7 @@ public class Game extends ApplicationAdapter
 				if (Byte.valueOf(list[0]) == Packet.PROJECTILE)
 				{
 					int numProjectiles = (list.length - 1)/3;
-					
-					//System.err.println(a);
-					
-					//System.out.println("projectiles: " + numProjectiles + " " + a);
-					/*
-					if (numProjectiles > 0)
-					{
-						System.out.println("projs : " + a);
-					}
-					*/
-					
 					projectileManager.clear();
-					
-					//System.out.println("client: projectile fire");
-					//System.err.println("projectile data");
 					
 					for (int i = 0; i < numProjectiles; i++)
 					{
@@ -225,12 +226,35 @@ public class Game extends ApplicationAdapter
 						projectileManager.addProjectile(pid, x, y, x, y);
 					}
 				}
+				
+				if (Byte.valueOf(list[0]) == Packet.EVENT)
+				{
+					//System.out.println("event packet " + a);
+					int events = (list.length - 1)/2;
+					
+					for (int i = 0; i < events; i++)
+					{
+						int type = Integer.valueOf(list[i * 2 + 1]).intValue();
+						byte pid = Byte.valueOf(list[i * 2 + 2]).byteValue();
+						
+						if (type ==  Event.EVENT_ENTITY_DESTROY)
+						{
+							System.out.println("destroy " + pid);
+							destroyEntity(pid);
+						}
+					}
+				}
 			}
 			else
 			{
 				System.err.println("client: zero size packet received");
 			}
 		}
+	}
+	
+	private void destroyEntity(byte id)
+	{
+		ships.remove(id);
 	}
 	
 	private void connect()

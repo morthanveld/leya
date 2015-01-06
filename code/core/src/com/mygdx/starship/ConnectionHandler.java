@@ -13,12 +13,15 @@ public class ConnectionHandler implements Runnable
 	private ArrayDeque<Packet> packetOutbox;
 	private ArrayDeque<Packet> packetInbox; 
 	
+	private BufferedReader inputBuffer = null;
+	
 	private final Object outboxLock = new Object();
 	private final Object inboxLock = new Object();
 	
 	public ConnectionHandler(Socket socket)
 	{
 		clientSocket = socket;
+		inputBuffer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream())); 
 		
 		synchronized (outboxLock) 
 		{
@@ -72,6 +75,18 @@ public class ConnectionHandler implements Runnable
 
 			// Receive packets.
 			receivePacket();
+			
+			/*
+			try 
+			{
+				// Reduce CPU time.
+				Thread.sleep(10);
+			} 
+			catch (InterruptedException e) 
+			{
+				e.printStackTrace();
+			}
+			*/
 		}
 		
 		System.out.println("Client disconnected " + clientSocket.getRemoteAddress());
@@ -96,10 +111,10 @@ public class ConnectionHandler implements Runnable
 		{
 			if (clientSocket.getInputStream().available() > 0)
 			{
-				BufferedReader buffer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream())); 
+				//BufferedReader buffer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream())); 
 
 				// Read data from client.
-				String d = buffer.readLine();
+				String d = inputBuffer.readLine();
 				packetInbox.add(new Packet(d.getBytes()));
 			}
 		} 

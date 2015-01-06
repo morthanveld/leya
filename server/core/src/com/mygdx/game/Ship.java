@@ -28,8 +28,8 @@ public class Ship extends Entity
 	{
 		super(type);
 		this.id = id;
+		this.hullIntegrity = 100.0f;
 	}
-	
 
 	public void updatePhysics(float dt)
 	{
@@ -48,7 +48,17 @@ public class Ship extends Entity
 		//this.direction = body.getAngle() * 180.0f / 3.141592f;
 		//System.out.println(id + " | " + connection.getInboxSize() + " | " + connection.getOutboxSize());
 	}
-
+	
+	public void impact(Bullet b)
+	{
+		this.hullIntegrity -= 40.0f;
+		
+		if (this.hullIntegrity < 0.01f)
+		{
+			super.scheduleDestruction();
+		}
+	}
+		
 	public float getLateralThrust() {
 		return lateralThrust;
 	}

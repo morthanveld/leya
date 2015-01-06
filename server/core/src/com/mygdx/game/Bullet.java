@@ -8,65 +8,75 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.World;
 
-public class Projectile 
+public class Bullet extends Entity
 {
+	/*
 	public Vector2 position;
 	public Vector2 velocity;
-	public float life;
-	public int id;
+	*/
+	private float life;
+	private int id;
 
 	private Body body = null;
 	private World world = null;
 	
-	public Projectile(World world, int id, Vector2 position, Vector2 velocity, float life)
+	public Bullet(World world, int id)//, Vector2 position, Vector2 velocity, float life)
 	{
+		super(ENTITY_BULLET);
+		
+		/*
 		this.position = new Vector2(position);
 		this.velocity = new Vector2(velocity);
 		this.life = life;
+		*/
 		this.id = id;
 		this.world = world;
-
-		// First we create a body definition
+		this.life = 5.0f;
+		
+	}
+	
+	public void createBody(Vector2 position, Vector2 velocity)
+	{
 		BodyDef bodyDef = new BodyDef();
-		// We set our body to dynamic, for something like ground which doesn't move we would set it to StaticBody
 		bodyDef.type = BodyType.DynamicBody;
-		// Set our body's starting position in the world
-		bodyDef.position.set(this.position);
-		bodyDef.linearVelocity.set(this.velocity);
+		bodyDef.position.set(position);
+		bodyDef.linearVelocity.set(velocity);
 		bodyDef.fixedRotation = true;
 
-		// Create our body in the world using our body definition
-		this.body = world.createBody(bodyDef);
-		
-
-		// Create a circle shape and set its radius to 6
 		CircleShape circle = new CircleShape();
 		circle.setRadius(Utils.downScale(6.0f));
 
-		// Create a fixture definition to apply our shape to
 		FixtureDef fixtureDef = new FixtureDef();
 		fixtureDef.shape = circle;
 		fixtureDef.density = 0.1f; 
 		fixtureDef.friction = 0.4f;
-		fixtureDef.restitution = 0.6f; // Make it bounce a little bit
-		
+		fixtureDef.restitution = 0.6f;
 		fixtureDef.filter.categoryBits = StarshipServer.CATEGORY_BULLET;
 		fixtureDef.filter.maskBits = StarshipServer.MASK_BULLET;
 		fixtureDef.filter.groupIndex = 0;
 
-		// Create our fixture and attach it to the body
-		//Fixture fixture = 
-		body.createFixture(fixtureDef);
+		super.createBody(bodyDef, fixtureDef);
 		
-		//this.body.setLinearVelocity(new Vector2(0,10000000000.0f));
-		//this.body.applyForceToCenter(new Vector2(0, 1000000000.0f), true);
-		//this.body.setLinearDamping(1.0f);
-				
-		// Remember to dispose of any shapes after you're done with them!
-		// BodyDef and FixtureDef don't need disposing, but shapes do.
 		circle.dispose();
 	}
 	
+	public void update(float dt)
+	{
+		life -= dt;
+	}
+	
+	public int getId()
+	{
+		return this.id;
+	}
+		
+	public boolean isDead()
+	{
+		return (life < 0.0f);
+	}
+	
+	
+	/*
 	public Body getBody()
 	{
 		return this.body;
@@ -75,5 +85,5 @@ public class Projectile
 	public void destroy()
 	{
 		world.destroyBody(this.body);
-	}
+	}*/
 }

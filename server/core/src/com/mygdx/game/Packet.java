@@ -8,6 +8,7 @@ public class Packet
 	public static final byte IO_MOUSE = 0x2;
 	public static final byte POSITION = 0x3;
 	public static final byte PROJECTILE = 0x4;
+	public static final byte EVENT = 0x5;
 	
 	private byte[] data = null;
 	
