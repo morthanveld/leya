@@ -82,7 +82,7 @@ public class StarshipServer extends ApplicationAdapter
 	
 	public void createAiTest()
 	{	
-		for (int i = 0; i < 2; i++)
+		for (int i = 0; i < 15; i++)
 		{
 			Vector2 p = new Vector2((float)Math.random() * 400.0f, (float)Math.random() * 400.0f);
 			createEnemy(Utils.downScale(p));
@@ -147,7 +147,7 @@ public class StarshipServer extends ApplicationAdapter
 		updateGame(dt);		
 		
 		ioTimer += dt;
-		if (ioTimer > (1.0 / 60.0f))
+		if (ioTimer > (1.0f / 60.0f))
 		{
 			updateOutput();
 			ioTimer = 0.0f;

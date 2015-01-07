@@ -42,11 +42,15 @@ public class Game extends ApplicationAdapter
 	private float inboxSum = 0.0f;
 	private float outboxSum = 0.0f;
 	
+	private Pattern regexPattern = null;
+	
 	@Override
 	public void create () 
 	{
 		//System.out.close();
 		id = (byte) (int) (Math.random() * 100.0f + 1.0f);
+		
+		regexPattern = Pattern.compile(";");
 		
 		// Connect to server.
 		connect();
@@ -110,7 +114,7 @@ public class Game extends ApplicationAdapter
 		
 		// Send output.
 		ioTimer += dt;
-		if (ioTimer > (1.0 / 60.0f))
+		if (ioTimer > (1.0f / 60.0f))
 		{
 			updateOutput();
 			ioTimer = 0.0f;
@@ -148,8 +152,9 @@ public class Game extends ApplicationAdapter
 			if (data.length > 0)
 			{
 				String a = new String(data);
-				Pattern pattern =  Pattern.compile(";");
-				String[] list = pattern.split(a.subSequence(0, a.length()));
+				//Pattern pattern =  Pattern.compile(";");
+				//String[] list = regexPattern.split(a.subSequence(0, a.length()));
+				String[] list = regexPattern.split(a);
 				
 				//System.out.println(a);
 				
@@ -169,43 +174,30 @@ public class Game extends ApplicationAdapter
 						float y = Utils.upScale(Float.valueOf(list[i * 5 + 4]).floatValue());
 						float dir = Float.valueOf(list[i * 5 + 5]).floatValue();
 											
-						// Check if data from server is intended for me.
-						//if (this.id == pid)
+						// Other player data.
+						if (!ships.containsKey(pid))
 						{
-							// Update position and direction.
-							//System.out.println("client: update me player");
-							
-							//ship.setPosition(x, y);
-							//ship.setDirection(dir);
-							//ship.setType(type);
+							// Create new player.
+							//								System.out.println("client: new other player data                                   !!!!!!!!!!!!!!!!!!   " + pid + "\t" + this.id);
+
+
+							ClientShip player = new ClientShip(pid, null);
+							player.setPosition(x, y);
+							player.setDirection(dir);
+							player.setType(type);
+							ships.put(pid, player);
+
 						}
-						//else
+						else
 						{
-							// Other player data.
-							if (!ships.containsKey(pid))
-							{
-								// Create new player.
-//								System.out.println("client: new other player data                                   !!!!!!!!!!!!!!!!!!   " + pid + "\t" + this.id);
-								
-								
-								ClientShip player = new ClientShip(pid, null);
-								player.setPosition(x, y);
-								player.setDirection(dir);
-								player.setType(type);
-								ships.put(pid, player);
-								
-							}
-							else
-							{
-								// Update existing player.
-								//System.out.println("client: update other player " + pid + "\t" + x + "\t" + y);
-								
-								ClientShip player = ships.get(pid);
-								player.setPosition(x, y);
-								player.setDirection(dir);
-								player.setType(type);
-								ships.put(pid, player);
-							}
+							// Update existing player.
+							//System.out.println("client: update other player " + pid + "\t" + x + "\t" + y);
+
+							ClientShip player = ships.get(pid);
+							player.setPosition(x, y);
+							player.setDirection(dir);
+							player.setType(type);
+							ships.put(pid, player);
 						}
 					}
 				}
