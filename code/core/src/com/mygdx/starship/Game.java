@@ -196,7 +196,7 @@ public class Game extends ApplicationAdapter
 							ClientShip player = ships.get(pid);
 							player.setPosition(x, y);
 							player.setDirection(dir);
-							player.setType(type);
+							//player.setType(type);
 							ships.put(pid, player);
 						}
 					}
@@ -257,7 +257,7 @@ public class Game extends ApplicationAdapter
         socketHints.connectTimeout = 4000;
         
         //create the socket and connect to the server entered in the text box ( x.x.x.x format ) on port 9021
-        socket = Gdx.net.newClientSocket(Protocol.TCP, "127.0.0.1", 1316, socketHints);
+        socket = Gdx.net.newClientSocket(Protocol.TCP, "127.0.0.1", 1313, socketHints);
         
         System.out.println("Connected to server " + socket.getRemoteAddress());
         

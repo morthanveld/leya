@@ -63,7 +63,7 @@ public class Enemy extends Ship
 		if (steeringBehavior != null) 
 		{
 			// Calculate steering acceleration
-			steeringBehavior.calculateSteering(steeringOutput);
+			//steeringBehavior.calculateSteering(steeringOutput);
 
 			Vector2 ll = new Vector2(steeringOutput.linear);
 			Vector2 dd = new Vector2(0.0f, 1.0f);

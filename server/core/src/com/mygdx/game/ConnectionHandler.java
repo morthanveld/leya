@@ -92,6 +92,7 @@ public class ConnectionHandler implements Runnable
 			{
 				e.printStackTrace();
 			}
+			
 		}
 	}
 	
@@ -115,14 +116,15 @@ public class ConnectionHandler implements Runnable
 		{
 			if (clientSocket.getInputStream().available() > 0)
 			{
-				// TODO: Create the buffer once instead of every read??!!
-				//BufferedReader buffer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream())); 
-
 				synchronized (inboxLock) 
 				{
 					// Read data from client.
 					String d = inputBuffer.readLine();
-					packetInbox.add(new Packet(d.getBytes()));
+					
+					synchronized (inboxLock) 
+					{
+						packetInbox.add(new Packet(d.getBytes()));
+					}
 				}
 			}
 		} 

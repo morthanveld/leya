@@ -82,9 +82,9 @@ public class StarshipServer extends ApplicationAdapter
 	
 	public void createAiTest()
 	{	
-		for (int i = 0; i < 15; i++)
+		for (int i = 0; i < 100; i++)
 		{
-			Vector2 p = new Vector2((float)Math.random() * 400.0f, (float)Math.random() * 400.0f);
+			Vector2 p = new Vector2((float)Math.random() * 800.0f, (float)Math.random() * 800.0f);
 			createEnemy(Utils.downScale(p));
 		}
 	}
@@ -158,16 +158,17 @@ public class StarshipServer extends ApplicationAdapter
 			System.out.println("FPS: " + Gdx.graphics.getFramesPerSecond() + " " + Gdx.graphics.getDeltaTime());
 		}
 		
-		
+		/*
 		try 
 		{
-			Thread.sleep((long)(1000/60-Gdx.graphics.getDeltaTime()));
+			Thread.sleep((long)(1000/120-Gdx.graphics.getDeltaTime()));
 		} 
 		catch (InterruptedException e) 
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		*/
 		
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
