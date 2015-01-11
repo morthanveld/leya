@@ -41,4 +41,9 @@ public class SpawnLocation
 		this.count = shipsToSpawn;
 		this.interval = interval;
 	}
+	
+	public int remainingSpawns()
+	{
+		return this.count;
+	}
 }
