@@ -2,6 +2,7 @@ package com.mygdx.game;
 
 import java.util.regex.Pattern;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
@@ -21,6 +22,8 @@ public class Player extends Ship
 	private static final int KEY_D = 3;
 	private static final int KEY_Q = 4;
 	private static final int KEY_E = 5;
+	
+	private boolean isReady = false;
 	
 	public Player(StarshipServer server, ConnectionHandler connection)
 	{
@@ -167,6 +170,29 @@ public class Player extends Ship
 						weapon.fire();
 					}
 				}
+				else if (type == Packet.EVENT)
+				{
+					//System.out.println("event packet " + a);
+					int events = (list.length - 2)/2;
+					
+					for (int i = 0; i < events; i++)
+					{
+						int eventType = Integer.valueOf(list[i * 2 + 2]).intValue();
+						byte eventId = Byte.valueOf(list[i * 2 + 3]).byteValue();
+						
+						if (eventType ==  Event.EVENT_ENTITY_DESTROY)
+						{
+							Gdx.app.debug("Player", "entity destroy - do nothing");
+						}
+						else if (eventType == Event.EVENT_PLAYER_READY)
+						{
+							Gdx.app.debug("Player", "player ready");
+							
+							// Tell game that player is ready.
+							this.isReady = true;
+						}
+					}
+				}
 			}
 			else
 			{
@@ -174,9 +200,15 @@ public class Player extends Ship
 			}
 		}
 	}
+
+	public boolean isReady()
+	{
+		return this.isReady;
+	}
 	
 	public ProjectileManager getProjectileManager()
 	{
-		return server.getProjectileManager();
+		return server.getGame().getProjectileManager();
 	}
+	
 }

@@ -17,7 +17,7 @@ public class Wave
 	{
 		for (SpawnLocation sl : spawnLocations)
 		{
-			sl.spawn(count / spawnLocations.size, 10);
+			sl.spawn(count / spawnLocations.size, 1.0f);
 		}
 	}
 	

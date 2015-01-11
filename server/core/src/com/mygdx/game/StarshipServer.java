@@ -25,21 +25,8 @@ import com.mygdx.game.Utils;
 
 public class StarshipServer extends ApplicationAdapter 
 {
-	private Array<Entity> entities;
-	private ProjectileManager projectileManager;
-	
 	float ioTimer = 0.0f;
-	
-	private World world = null;
-	
-	private int VELOCITY_ITERATIONS = 6;
-	private int POSITION_ITERATIONS = 2;
-	
-	Box2DDebugRenderer debugRenderer = null;
-	private OrthographicCamera camera;
-	
-	private Array<RadiusProximity<Vector2>> proximities;
-	
+		
 	static final short CATEGORY_PLAYER = 0x0001;
 	static final short CATEGORY_ENEMY =  0x0002;
 	static final short CATEGORY_BULLET = 0x0004;
@@ -50,101 +37,27 @@ public class StarshipServer extends ApplicationAdapter
 	static final short MASK_BULLET = CATEGORY_PLAYER | CATEGORY_ENEMY | CATEGORY_WORLD;
 	static final short MASK_WORLD = -1;
 	
-	private Array<SpawnLocation> spawnLocations;
-	
-	private Array<Event> events;
+	private Game game = null;
 	
 	public void create () 
 	{
-		//System.out.close();
 		Box2D.init();
-		world = WorldSingleton.getInstance().getWorld();
 		
-		camera = new OrthographicCamera(Utils.downScale(3280), Utils.downScale(1720));
-		debugRenderer = new Box2DDebugRenderer();
+		game = new Game(this);
 		
-		entities = new Array<Entity>();
-		projectileManager = new ProjectileManager(world);
-		spawnLocations = new Array<SpawnLocation>();
-		
-		spawnLocations.add(new SpawnLocation(this, new Vector2()));
-				
-		this.proximities = new Array<RadiusProximity<Vector2>>();
-		createAiTest();
-		
+		Gdx.app.setLogLevel(3);
+			
 		ContactListener cl = new ContactListener(this);
-		
-		events = new Array<Event>();
 		
 		// Start listening on incoming clients.
 		listen();
 	}
-	
-	public void createAiTest()
-	{	
-		for (int i = 0; i < 100; i++)
-		{
-			Vector2 p = new Vector2((float)Math.random() * 800.0f, (float)Math.random() * 800.0f);
-			createEnemy(Utils.downScale(p));
-		}
-	}
-	
-	public void createEnemy(Vector2 position)
-	{
-		Enemy e = new Enemy();
-		e.createBody(position);
-		/*
-		p.setPosition(new Vector2(position));
-		p.setupPhysics();
-		*/
 		
-		// Wander behavior.
-		Wander<Vector2> w = new Wander<Vector2>(e);
-		w.setFaceEnabled(false);
-		w.setWanderOffset(Utils.downScale(100));
-		w.setWanderOrientation(Utils.downScale(10));
-		w.setWanderRadius(Utils.downScale(300));
-		w.setWanderRate(MathUtils.PI * 100);
-				
-		// Collision avoidance behavior.
-		RadiusProximity<Vector2> rp = new RadiusProximity<Vector2>(e, entities, Utils.downScale(300.0f));
-		this.proximities.add(rp);
-		CollisionAvoidance<Vector2> collisionAvoidanceSB = new CollisionAvoidance<Vector2>(e, rp);
-		
-		// Add behaviors.
-		PrioritySteering<Vector2> prioritySteeringSB = new PrioritySteering<Vector2>(e, 0.0001f);
-		prioritySteeringSB.add(collisionAvoidanceSB);
-		prioritySteeringSB.add(w);
-		
-		e.setSteeringBehavior(prioritySteeringSB);
-		
-		entities.add(e);
-	}
-	
-	/*
-	public void destroyEntity(Entity e)
-	{
-		for (Entity entity : entities)
-		{
-			entity.destroy();
-		}
-		entities.removeValue(e, false);
-	}
-	*/
-	
-	public World getWorld()
-	{
-		return this.world;
-	}
-	
 	public void render()
 	{
 		float dt = 1.0f / 60.0f;
-		//float dt = Gdx.graphics.getDeltaTime();
 		
-		updateInput();
-		updatePhysics(dt);
-		updateGame(dt);		
+		this.game.update(dt);
 		
 		ioTimer += dt;
 		if (ioTimer > (1.0f / 60.0f))
@@ -157,76 +70,18 @@ public class StarshipServer extends ApplicationAdapter
 		{
 			System.out.println("FPS: " + Gdx.graphics.getFramesPerSecond() + " " + Gdx.graphics.getDeltaTime());
 		}
-		
-		/*
-		try 
-		{
-			Thread.sleep((long)(1000/120-Gdx.graphics.getDeltaTime()));
-		} 
-		catch (InterruptedException e) 
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		*/
-		
-		Gdx.gl.glClearColor(0, 0, 0, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		debugRenderer.render(world, camera.combined);
+				
+		this.game.render();
 	}
 		
-	/*
-	 * Game Update
-	 * Physics and AI.
-	 */
-	public void updatePhysics(float dt)
-	{
-		world.step(dt, VELOCITY_ITERATIONS, POSITION_ITERATIONS);
-		
-		for (Entity e : entities)
-		{
-			if (e instanceof Enemy)
-			{
-				((Enemy) e).updateAi(dt);
-			}
-			if (e instanceof Player)
-			{
-				((Player) e).update(dt);
-			}
-			if (e instanceof Ship)
-			{
-				Ship s = (Ship) e;
-				s.updatePhysics(dt);
-				if (s.isScheduledDestruction())
-				{
-					// Create event.
-					Event event = new Event();
-					event.createEntityDestroy(s.getId());
-					events.add(event);
-					
-					System.err.println("destroy");
-					s.destroy();
-					entities.removeValue(e, false);
-				}
-			}					
-		}
-		
-		// Update projectiles.
-		projectileManager.updatePhysics(dt);
-	}
-	
-	public void updateGame(float dt)
-	{
-		for (SpawnLocation spawnLocation : this.spawnLocations)
-		{
-			spawnLocation.update(dt);
-		}
-	}
-	
 	public void updateOutput()
 	{
 		StringBuffer a = new StringBuffer();
 		a.append(Packet.POSITION);
+		
+		Array<Entity> entities = this.game.getEntities();
+		Array<Event> events = this.game.getEvents();
+		ProjectileManager projectileManager = this.game.getProjectileManager();
 		
 		for (Entity e : entities)
 		{
@@ -302,22 +157,7 @@ public class StarshipServer extends ApplicationAdapter
 			}
 		}
 	}
-	
-	public void updateInput()
-	{
-		if (Gdx.input.isKeyPressed(Keys.ESCAPE))
-		{
-			Gdx.app.exit();
-		}
-		if (Gdx.input.isKeyPressed(Keys.NUM_1))
-		{
-			for (SpawnLocation spawnLocation : this.spawnLocations)
-			{
-				spawnLocation.spawn(4, 3);
-			}
-		}
-	}
-	
+		
 	public void listen()
 	{
 		Runnable PlayerLobby = new PlayerLobby(this);
@@ -326,27 +166,16 @@ public class StarshipServer extends ApplicationAdapter
 	
 	public void registerPlayer(ConnectionHandler connection)
 	{
-		Player p = new Player(this, connection);
-		p.createBody(new Vector2(0.0f, 0.0f));
-		entities.add(p);
-		
-		for (Entity entity : entities)
-		{
-			if (entity instanceof Enemy)
-			{
-				((Enemy) entity).setSteeringBehavior(new Pursue<Vector2>(entity, p));
-			}
-		}
+		this.game.addPlayer(connection);
 	}
 	
-	public void unregisterPlayer(Player p)
+	public void unregisterPlayer(Player player)
 	{
-		System.out.println("server: unregister player " + p.getId());
-		entities.removeValue(p, false);
+		this.game.removePlayer(player);
 	}
-
-	public ProjectileManager getProjectileManager() 
+	
+	public Game getGame()
 	{
-		return projectileManager;
+		return this.game;
 	}
 }

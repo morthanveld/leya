@@ -6,13 +6,13 @@ public class SpawnLocation
 {
 	private int count = 0;
 	private float interval = 0.0f;
-	private StarshipServer server = null;
+	private Game game = null;
 	private Vector2 position;
 	private float timer = 0.0f;
 	
-	public SpawnLocation(StarshipServer server, Vector2 position)
+	public SpawnLocation(Game game, Vector2 position)
 	{
-		this.server = server;
+		this.game = game;
 		this.position = position;
 	}
 	
@@ -27,7 +27,7 @@ public class SpawnLocation
 		// Spawn an enemy if pool > 0 and interval reached.
 		if (count > 0 && timer < 0.0f)
 		{
-			this.server.createEnemy(this.position);
+			this.game.createEnemy(this.position);
 			this.count--;
 			this.timer = this.interval; 
 		}

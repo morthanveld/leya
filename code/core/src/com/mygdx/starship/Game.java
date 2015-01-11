@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.net.Socket;
 import com.badlogic.gdx.net.SocketHints;
+import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.Event;
 import com.mygdx.game.Utils;
 
@@ -31,6 +32,8 @@ public class Game extends ApplicationAdapter
 	
 	ProjectileManager projectileManager = null;
 	
+	private Array<Event> events = null;
+	
 	byte id = 0;
 	
 	private HashMap<Byte, ClientShip> ships;
@@ -44,11 +47,21 @@ public class Game extends ApplicationAdapter
 	
 	private Pattern regexPattern = null;
 	
+	private Lobby lobby = null;
+	
+	private int state = 0;
+	
+	static final int STATE_LOBBY = 0x1;
+	static final int STATE_WAITING = 0x2;
+	static final int STATE_RUNNING = 0x3;
+	
 	@Override
 	public void create () 
 	{
 		//System.out.close();
 		id = (byte) (int) (Math.random() * 100.0f + 1.0f);
+		
+		events = new Array<Event>();
 		
 		regexPattern = Pattern.compile(";");
 		
@@ -71,8 +84,13 @@ public class Game extends ApplicationAdapter
 		clientInput = new ClientInput(ship);
 		
 		ships.put(id, ship);
-		Gdx.input.setInputProcessor(clientInput);
+		//Gdx.input.setInputProcessor(clientInput);
 
+		lobby = new Lobby(this);
+		
+		this.state = STATE_LOBBY;
+		
+		Gdx.app.setLogLevel(3);
 	}
 
 	@Override
@@ -81,7 +99,6 @@ public class Game extends ApplicationAdapter
 		long start = System.currentTimeMillis();
 		inboxSum += connectionHandler.getInboxSize();
 		updateInput();
-		
 		
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -92,23 +109,33 @@ public class Game extends ApplicationAdapter
 		float dt = Math.min(Gdx.graphics.getDeltaTime(), 1.0f / 60.0f);
 		//dt = 1.0f / 120.0f;
 
-		space.update(dt);
-		space.render(camera, ship);
-		
-		/*
-		ship.update(dt);
-		ship.render(camera);
-		*/
-				
-		for(ClientShip player : ships.values())
+		if (this.state == STATE_LOBBY)
 		{
-			player.update(dt);
-			player.render(camera);
+			this.lobby.update(dt);
+			this.lobby.render();
 		}
-		
-		// Render projectiles.
-		projectileManager.updatePhysics(dt);
-		projectileManager.render(camera);
+		else if (this.state == STATE_WAITING)
+		{
+			// Set input to ship control.
+			clientInput = new ClientInput(ship);
+			Gdx.input.setInputProcessor(clientInput);
+			nextState();
+		}
+		else if (this.state == STATE_RUNNING)
+		{
+			space.update(dt);
+			space.render(camera, ship);
+
+			for(ClientShip player : ships.values())
+			{
+				player.update(dt);
+				player.render(camera);
+			}
+
+			// Render projectiles.
+			projectileManager.updatePhysics(dt);
+			projectileManager.render(camera);
+		}
 
 		outboxSum += connectionHandler.getOutboxSize();
 		
@@ -131,6 +158,14 @@ public class Game extends ApplicationAdapter
 			outboxSum = 0;
 		}
 	}
+	
+	public void resize(int width, int height) 
+	{
+		if (this.lobby != null)
+		{
+			this.lobby.resize(width, height);
+		}
+    }
 	
 	public void updateInput()
 	{
@@ -289,5 +324,76 @@ public class Game extends ApplicationAdapter
 				//lastKeyboardPacket = a.toString();
 			}
 		}
+		
+		if (events.size > 0)
+		{
+			StringBuffer eventBuffer = new StringBuffer();
+			eventBuffer.append(id);		
+			eventBuffer.append(";");
+			eventBuffer.append(Packet.EVENT);
+			
+			while (events.size > 0)
+			{
+				Event event = events.pop();
+				
+				switch (event.getType())
+				{
+				case Event.EVENT_ENTITY_DESTROY:
+				{						
+					eventBuffer.append(";");
+					eventBuffer.append(event.getType());
+					eventBuffer.append(";");
+					eventBuffer.append(event.getEntityId());
+					break;
+				}
+				case Event.EVENT_PLAYER_READY:
+				{
+					eventBuffer.append(";");
+					eventBuffer.append(event.getType());
+					eventBuffer.append(";");
+					eventBuffer.append(event.getEntityId());
+					break;					
+				}
+				}
+			}
+			
+			eventBuffer.append("\n");
+			
+			connectionHandler.addPacket(new Packet(eventBuffer.toString().getBytes()));
+		}
+	}
+	
+	public void addEvent(Event e)
+	{
+		events.add(e);
+	}
+	
+	/**
+	 * Method to change game state.
+	 */
+	public void nextState()
+	{
+		switch (this.state)
+		{
+		case STATE_LOBBY:
+		{
+			this.state = STATE_WAITING;
+			break;
+		}
+		case STATE_WAITING:
+		{
+			this.state = STATE_RUNNING;
+			break;
+		}
+		case STATE_RUNNING:
+		{
+			break;
+		}
+		}
+	}
+	
+	public byte getId()
+	{
+		return this.id;
 	}
 }
