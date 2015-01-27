@@ -1,11 +1,14 @@
 package com.mygdx.game;
 
+import java.util.Random;
+
 import com.badlogic.gdx.math.Vector2;
 
 public class Utils 
 {
 	private static float downScale = 0.01f;
 	private static float upScale = 1.0f / downScale;
+	private static Random generator = new Random(21);
 	
 	public static Vector2 downScale(Vector2 v)
 	{
@@ -25,5 +28,10 @@ public class Utils
 	public static float upScale(float f)
 	{
 		return f * upScale;
+	}
+	
+	public static float getNextRandom()
+	{
+		return generator.nextFloat();
 	}
 }

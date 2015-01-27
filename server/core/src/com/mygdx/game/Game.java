@@ -60,10 +60,19 @@ public class Game
 		loadLevel();
 		
 		this.state = STATE_LOBBY;
+		
+		// TODO: Only to get game testing started.
+		nextState();
 	}
 	
 	public void loadLevel()
 	{
+		Rock r = new Rock();
+		r.createBody(new Vector2(0.0f, 0.0f));
+		this.entities.add(r);
+		Rock s = new Rock();
+		s.createBody(new Vector2(0.1f, 0.0f));
+		this.entities.add(s);
 		
 		Wave w = new Wave(10);
 		w.addSpawnLocation(new SpawnLocation(this, Utils.downScale(new Vector2(200.0f, 200.0f))));
