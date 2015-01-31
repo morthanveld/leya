@@ -52,8 +52,9 @@ public class Game extends ApplicationAdapter
 	private int state = 0;
 	
 	static final int STATE_LOBBY = 0x1;
-	static final int STATE_WAITING = 0x2;
-	static final int STATE_RUNNING = 0x3;
+	static final int STATE_WAITING_FOR_PLAYERS = 0x2;
+	static final int STATE_LOADING_LEVEL = 0x3;
+	static final int STATE_GAME_RUNNING = 0x4;
 	
 	@Override
 	public void create () 
@@ -114,14 +115,19 @@ public class Game extends ApplicationAdapter
 			this.lobby.update(dt);
 			this.lobby.render();
 		}
-		else if (this.state == STATE_WAITING)
+		else if (this.state == STATE_WAITING_FOR_PLAYERS)
 		{
 			// Set input to ship control.
 			clientInput = new ClientInput(ship);
 			Gdx.input.setInputProcessor(clientInput);
 			nextState();
 		}
-		else if (this.state == STATE_RUNNING)
+		else if (this.state == STATE_LOADING_LEVEL)
+		{
+			// Wait for level to load.
+			nextState();
+		}
+		else if (this.state == STATE_GAME_RUNNING)
 		{
 			space.update(dt);
 			space.render(camera, ship);
@@ -292,7 +298,7 @@ public class Game extends ApplicationAdapter
         socketHints.connectTimeout = 4000;
         
         //create the socket and connect to the server entered in the text box ( x.x.x.x format ) on port 9021
-        socket = Gdx.net.newClientSocket(Protocol.TCP, "127.0.0.1", 1313, socketHints);
+        socket = Gdx.net.newClientSocket(Protocol.TCP, "127.0.0.1", 1315, socketHints);
         
         System.out.println("Connected to server " + socket.getRemoteAddress());
         
@@ -377,15 +383,20 @@ public class Game extends ApplicationAdapter
 		{
 		case STATE_LOBBY:
 		{
-			this.state = STATE_WAITING;
+			this.state = STATE_LOADING_LEVEL;
 			break;
 		}
-		case STATE_WAITING:
+		case STATE_LOADING_LEVEL:
 		{
-			this.state = STATE_RUNNING;
+			this.state = STATE_WAITING_FOR_PLAYERS;
 			break;
 		}
-		case STATE_RUNNING:
+		case STATE_WAITING_FOR_PLAYERS:
+		{
+			this.state = STATE_GAME_RUNNING;
+			break;
+		}
+		case STATE_GAME_RUNNING:
 		{
 			break;
 		}

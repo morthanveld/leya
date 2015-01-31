@@ -24,7 +24,7 @@ public class Rock extends Prop
 		bodyDef.angularDamping = 0.5f;
 		bodyDef.linearDamping = 0.2f;
 
-		int c = 4;
+		int c = 5;
 		Vector2[] vertices = new Vector2[c];
 		for (int i = 0; i < c; i++)
 		{

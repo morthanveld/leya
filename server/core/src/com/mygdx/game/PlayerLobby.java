@@ -26,7 +26,7 @@ public class PlayerLobby implements Runnable
 		// Create the socket server using TCP protocol and listening on 9021
 		// Only one app can listen to a port at a time, keep in mind many ports are reserved
 		// especially in the lower numbers ( like 21, 80, etc )
-		ServerSocket serverSocket = Gdx.net.newServerSocket(Protocol.TCP, 1313, serverSocketHint);
+		ServerSocket serverSocket = Gdx.net.newServerSocket(Protocol.TCP, 1315, serverSocketHint);
 
 		while(true)
 		{

@@ -35,7 +35,6 @@ public class Space
 		shape.begin(ShapeType.Point);
 		shape.setColor(1, 1, 1, 1);
 		
-		
 		for (int i = 0; i < stars.size; i++)
 		{
 			Vector3 star = (Vector3)stars.get(i);

@@ -24,9 +24,10 @@ public class Game
 	private Array<Wave> waves = null;
 	
 	static final int STATE_LOBBY = 0x1;
-	static final int STATE_START = 0x2;
-	static final int STATE_RUNNING = 0x3;
-	static final int STATE_END = 0x4;
+	static final int STATE_LOADING_LEVEL = 0x2;
+	static final int STATE_START = 0x3;
+	static final int STATE_GAME_RUNNING = 0x4;
+	static final int STATE_END = 0x5;
 	
 	private int state = 0;
 	private World world = null;
@@ -62,7 +63,7 @@ public class Game
 		this.state = STATE_LOBBY;
 		
 		// TODO: Only to get game testing started.
-		nextState();
+		//nextState();
 	}
 	
 	public void loadLevel()
@@ -117,6 +118,11 @@ public class Game
 			
 			break;
 		}
+		case STATE_LOADING_LEVEL:
+		{
+			// Send level information to players. Levels are procedurally created by the server.
+			break;
+		}
 		case STATE_START:
 		{
 			// Start current wave.
@@ -129,7 +135,7 @@ public class Game
 			
 			break;
 		}
-		case STATE_RUNNING:
+		case STATE_GAME_RUNNING:
 		{
 			// Step box2d physics.
 			this.world.step(dt, VELOCITY_ITERATIONS, POSITION_ITERATIONS);
@@ -252,6 +258,16 @@ public class Game
 		entities.add(e);
 	}
 	
+	public void createRock(Vector2 position)
+	{
+		// Create rock.
+		Rock rock = new Rock();
+		rock.createBody(position);
+		this.entities.add(rock);
+		
+		// Send
+	}
+	
 	public void nextState()
 	{
 		state++;
@@ -275,7 +291,7 @@ public class Game
 		}
 		}
 		
-		if (state > 4)
+		if (state > Game.STATE_END)
 		{
 			state = Game.STATE_END;
 		}
