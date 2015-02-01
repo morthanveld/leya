@@ -9,6 +9,7 @@ public class Utils
 	private static float downScale = 0.01f;
 	private static float upScale = 1.0f / downScale;
 	private static Random generator = new Random(21);
+	private static int uniqueId = 0;
 	
 	public static Vector2 downScale(Vector2 v)
 	{
@@ -33,5 +34,10 @@ public class Utils
 	public static float getNextRandom()
 	{
 		return generator.nextFloat();
+	}
+	
+	public static int getUniqueId()
+	{
+		return ++uniqueId;
 	}
 }

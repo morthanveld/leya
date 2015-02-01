@@ -121,6 +121,45 @@ public class Game
 		case STATE_LOADING_LEVEL:
 		{
 			// Send level information to players. Levels are procedurally created by the server.
+			System.out.println("Sending level data in update.");
+
+			// Compile packet.
+			StringBuffer a = new StringBuffer();
+			a.append(Packet.LEVEL);
+			
+			for (Entity e : entities)
+			{
+				if (e instanceof Rock)
+				{
+					Rock r = (Rock) e;
+					a.append(";");
+					a.append(r.getId());
+					a.append(";");
+					a.append("0"); // TYPE
+					a.append(";");
+					a.append(r.getPosition().x);
+					a.append(";");
+					a.append(r.getPosition().y);
+					a.append(";");
+					a.append(r.getDirection());
+				}
+			}
+			
+			a.append("\n");
+			
+			Packet levelData = new Packet(a.toString().getBytes());
+			
+			for (Entity e : entities)
+			{
+				if (e instanceof Player)
+				{
+					((Player) e).update(dt);
+					((Player) e).addPacket(levelData);
+				}
+			}
+			
+			this.nextState();
+			
 			break;
 		}
 		case STATE_START:
@@ -284,7 +323,7 @@ public class Game
 			Gdx.app.debug("game", "state start");
 			break;
 		}
-		case STATE_RUNNING:
+		case STATE_GAME_RUNNING:
 		{
 			Gdx.app.debug("game", "state running");
 			break;

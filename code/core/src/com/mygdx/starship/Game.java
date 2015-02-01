@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.net.Socket;
 import com.badlogic.gdx.net.SocketHints;
 import com.badlogic.gdx.utils.Array;
@@ -56,6 +57,8 @@ public class Game extends ApplicationAdapter
 	static final int STATE_LOADING_LEVEL = 0x3;
 	static final int STATE_GAME_RUNNING = 0x4;
 	
+	private Array<Prop> props = null;
+	
 	@Override
 	public void create () 
 	{
@@ -83,6 +86,8 @@ public class Game extends ApplicationAdapter
 		projectileManager = new ProjectileManager();
 			
 		clientInput = new ClientInput(ship);
+		
+		props = new Array<Prop>();
 		
 		ships.put(id, ship);
 		//Gdx.input.setInputProcessor(clientInput);
@@ -125,7 +130,7 @@ public class Game extends ApplicationAdapter
 		else if (this.state == STATE_LOADING_LEVEL)
 		{
 			// Wait for level to load.
-			nextState();
+			System.out.println("STATE_LOADING_LEVEL");
 		}
 		else if (this.state == STATE_GAME_RUNNING)
 		{
@@ -136,6 +141,11 @@ public class Game extends ApplicationAdapter
 			{
 				player.update(dt);
 				player.render(camera);
+			}
+			
+			for (Prop p : props)
+			{
+				p.render(camera);
 			}
 
 			// Render projectiles.
@@ -276,6 +286,28 @@ public class Game extends ApplicationAdapter
 							destroyEntity(pid);
 						}
 					}
+				}
+				
+				if (Byte.valueOf(list[0]) == Packet.LEVEL)
+				{
+					System.out.println("LEVEL DATA: " + a);
+					
+					int count = (list.length - 1)/5;
+					
+					for (int i = 0; i < count; i++)
+					{
+						int id = Byte.valueOf(list[i * 5 + 1]).intValue();
+						int type = Byte.valueOf(list[i * 5 + 2]).intValue();
+						float x = Utils.upScale(Float.valueOf(list[i * 5 + 3]).floatValue());
+						float y = Utils.upScale(Float.valueOf(list[i * 5 + 4]).floatValue());
+						float dir = Float.valueOf(list[i * 5 + 5]).floatValue();
+						
+						Prop prop = new Prop(id, new Vector2(x, y), dir);
+						props.add(prop);
+					}
+					
+					// When level received, next game state.
+					this.nextState();
 				}
 			}
 			else
