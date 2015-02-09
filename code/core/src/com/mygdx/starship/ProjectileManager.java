@@ -29,7 +29,8 @@ public class ProjectileManager
 		for (Projectile p : projs.values())
 		{
 			Vector2 pos = p.getPosition();
-			shape.circle(pos.x, pos.y, 3.0f);
+			//shape.circle(pos.x, pos.y, 3.0f);
+			shape.line(p.getOldPosition(), pos);
 		}
 		
 		shape.end();
