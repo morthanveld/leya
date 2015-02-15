@@ -12,7 +12,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.Utils;
 import com.mygdx.game.Entity;
 
-public class ClientShip
+public class ClientShip extends ClientEntity
 {
 	private Vector2 position;
 	private Quaternion orientation;
@@ -25,12 +25,14 @@ public class ClientShip
 	public Weapon weapon;
 	
 	private ConnectionHandler connectionHandler = null;
-	private byte type;
+	//private int type;
 	
 	private ShapeRenderer shape = null;
 	
 	public ClientShip(int id, ConnectionHandler connection)
 	{
+		super(id);
+		
 		connectionHandler = connection;
 		
 		batch = new SpriteBatch();
@@ -105,13 +107,17 @@ public class ClientShip
 		return this.position;
 	}
 
-	public byte getType() 
+	/*
+	public int getType() 
 	{
 		return type;
 	}
+	*/
 
-	public void setType(byte type) 
+	public void setType(int type) 
 	{
+		super.setType(type);
+		
 		this.img.dispose();
 		
 		if (type == Entity.ENTITY_PLAYER)
@@ -122,7 +128,5 @@ public class ClientShip
 		{
 			this.img = new Texture("sampleShip3.png");
 		}
-		
-		this.type = type;
 	}
 }

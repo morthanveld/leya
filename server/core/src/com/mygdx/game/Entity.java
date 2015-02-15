@@ -10,13 +10,13 @@ import com.badlogic.gdx.physics.box2d.World;
 
 public class Entity implements Steerable<Vector2>
 {
-	public static short ENTITY_WORLD = 1;
-	public static short ENTITY_PLAYER = 2;
-	public static short ENTITY_ENEMY = 3;
-	public static short ENTITY_BULLET = 4;
-	public static short ENTITY_PROP = 5;
+	public static int ENTITY_WORLD = 1;
+	public static int ENTITY_PLAYER = 2;
+	public static int ENTITY_ENEMY = 3;
+	public static int ENTITY_BULLET = 4;
+	public static int ENTITY_PROP = 5;
 	
-	private short type = 0;
+	private int type = 0;
 	private Body body = null;
 	private World world = null;
 	
@@ -29,11 +29,29 @@ public class Entity implements Steerable<Vector2>
 	
 	private boolean scheduleDestruction = false;
 	
+	private int id = 0;
+	
 	// TODO: MUST FIX DESTROY OF ENTITY
-	public Entity(short type)
+	public Entity(int type)
 	{
+		if (type != ENTITY_PLAYER)
+		{
+			// If entity is a player, id get set later.
+			this.id = Utils.getUniqueId();
+		}
 		this.type = type;
 		this.world = WorldSingleton.getInstance().getWorld();
+	}
+	
+	
+	public int getId()
+	{
+		return this.id;
+	}
+	
+	protected void setId(int id)
+	{
+		this.id = id;
 	}
 	
 	public void destroy()
@@ -73,7 +91,7 @@ public class Entity implements Steerable<Vector2>
 		return this.body;
 	}
 
-	public short getType()
+	public int getType()
 	{
 		return this.type;
 	}

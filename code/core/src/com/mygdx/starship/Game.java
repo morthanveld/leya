@@ -15,6 +15,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.net.Socket;
 import com.badlogic.gdx.net.SocketHints;
 import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.Entity;
 import com.mygdx.game.Event;
 import com.mygdx.game.Utils;
 
@@ -37,7 +38,9 @@ public class Game extends ApplicationAdapter
 	
 	byte id = 0;
 	
-	private HashMap<Byte, ClientShip> ships;
+	//private HashMap<Byte, ClientShip> ships;
+	
+	private Array<ClientEntity> entities = null;
 	
 	private float ioTimer = 0.0f;
 	
@@ -81,7 +84,9 @@ public class Game extends ApplicationAdapter
 		
 		
 		
-		ships = new HashMap<Byte, ClientShip>();
+		//ships = new HashMap<Byte, ClientShip>();
+		
+		entities = new Array<ClientEntity>();
 		
 		projectileManager = new ProjectileManager();
 			
@@ -89,7 +94,10 @@ public class Game extends ApplicationAdapter
 		
 		props = new Array<Prop>();
 		
-		ships.put(id, ship);
+		//ships.put(id, ship);
+		
+		entities.add(ship);
+		
 		//Gdx.input.setInputProcessor(clientInput);
 
 		lobby = new Lobby(this);
@@ -131,22 +139,40 @@ public class Game extends ApplicationAdapter
 		{
 			// Wait for level to load.
 			System.out.println("STATE_LOADING_LEVEL");
+			nextState();
 		}
 		else if (this.state == STATE_GAME_RUNNING)
 		{
 			space.update(dt);
 			space.render(camera, ship);
+			
+			for (ClientEntity entity : entities)
+			{
+				if (entity instanceof ClientShip)
+				{
+					ClientShip cs = (ClientShip) entity;
+					cs.update(dt);
+					cs.render(camera);	
+				}
+				
+				if (entity instanceof Prop)
+				{
+					Prop cp = (Prop) entity;
+					cp.render(camera);
+				}
+			}
 
+			/*
 			for(ClientShip player : ships.values())
 			{
-				player.update(dt);
-				player.render(camera);
+				
 			}
 			
 			for (Prop p : props)
 			{
-				p.render(camera);
+				
 			}
+			*/
 
 			// Render projectiles.
 			projectileManager.updatePhysics(dt);
@@ -207,7 +233,7 @@ public class Game extends ApplicationAdapter
 				//String[] list = regexPattern.split(a.subSequence(0, a.length()));
 				String[] list = regexPattern.split(a);
 				
-				//System.out.println(a);
+				System.out.println(a);
 				
 				// Check if position data.
 				if (Byte.valueOf(list[0]) == Packet.POSITION)
@@ -218,37 +244,77 @@ public class Game extends ApplicationAdapter
 					
 					for (int i = 0; i < numPlayers; i++)
 					{
-						
-						byte pid = Byte.valueOf(list[i * 5 + 1]).byteValue();
-						byte type = Byte.valueOf(list[i * 5 + 2]).byteValue();
+						int pid = Integer.valueOf(list[i * 5 + 1]).intValue();
+						int type = Integer.valueOf(list[i * 5 + 2]).intValue();
 						float x = Utils.upScale(Float.valueOf(list[i * 5 + 3]).floatValue());
 						float y = Utils.upScale(Float.valueOf(list[i * 5 + 4]).floatValue());
 						float dir = Float.valueOf(list[i * 5 + 5]).floatValue();
 											
 						// Other player data.
-						if (!ships.containsKey(pid))
+						//if (!ships.containsKey(pid))
+						if (!entityExists(pid))
 						{
 							// Create new player.
 							//								System.out.println("client: new other player data                                   !!!!!!!!!!!!!!!!!!   " + pid + "\t" + this.id);
 
-
-							ClientShip player = new ClientShip(pid, null);
-							player.setPosition(x, y);
-							player.setDirection(dir);
-							player.setType(type);
-							ships.put(pid, player);
+							if (type == Entity.ENTITY_PLAYER || type == Entity.ENTITY_ENEMY)
+							{
+								ClientShip player = new ClientShip(pid, null);
+								player.setPosition(x, y);
+								player.setDirection(dir);
+								player.setType(type);
+								entities.add(player);
+								
+								System.out.println("new player " + pid);
+							}
+							
+							/*
+							if (type == Entity.ENTITY_PROP)
+							{
+								Prop prop = new Prop(id, new Vector2(x, y), dir);					
+								entities.add(prop);
+							}
+							*/
+							
+							//ships.put(pid, player);
+							
 
 						}
 						else
 						{
+							ClientEntity ce = getEntity(pid);
+
+							if (ce instanceof ClientShip)
+							{
+								ClientShip cs = (ClientShip) ce;
+								cs.setPosition(x, y);
+								cs.setDirection(dir);
+							}
+							
+							/*
+							if (ce instanceof Prop)
+							{
+								Prop prop = (Prop) ce;
+								prop.setPosition(new Vector2(x, y));
+								prop.setDirection(dir);
+							}
+							*/
+							
 							// Update existing player.
 							//System.out.println("client: update other player " + pid + "\t" + x + "\t" + y);
 
-							ClientShip player = ships.get(pid);
+							//ClientShip player = ships.get(pid);
+							
+							/*
+							ClientShip player = (ClientShip) getEntity(pid);
 							player.setPosition(x, y);
 							player.setDirection(dir);
+							*/
+							
 							//player.setType(type);
-							ships.put(pid, player);
+							//ships.put(pid, player);
+							
+							// TODO: Might not work??!
 						}
 					}
 				}
@@ -291,7 +357,8 @@ public class Game extends ApplicationAdapter
 				if (Byte.valueOf(list[0]) == Packet.LEVEL)
 				{
 					System.out.println("LEVEL DATA: " + a);
-					
+
+					/*
 					int count = (list.length - 1)/5;
 					
 					for (int i = 0; i < count; i++)
@@ -302,9 +369,10 @@ public class Game extends ApplicationAdapter
 						float y = Utils.upScale(Float.valueOf(list[i * 5 + 4]).floatValue());
 						float dir = Float.valueOf(list[i * 5 + 5]).floatValue();
 						
-						Prop prop = new Prop(id, new Vector2(x, y), dir);
-						props.add(prop);
+						Prop prop = new Prop(id, new Vector2(x, y), dir);					
+						entities.add(prop);
 					}
+					*/
 					
 					// When level received, next game state.
 					this.nextState();
@@ -319,8 +387,44 @@ public class Game extends ApplicationAdapter
 	
 	private void destroyEntity(byte id)
 	{
-		ships.remove(id);
+		//ships.remove(id);
+		for (int i = 0; i < entities.size; i++)
+		{
+			ClientEntity ce = entities.get(i);
+			if (ce.getId() == id)
+			{
+				entities.removeIndex(i);
+				break;
+			}
+		}
 	}
+	
+	private boolean entityExists(int id)
+	{
+		for (ClientEntity ce : entities)
+		{
+			if (ce.getId() == id)
+			{
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	private ClientEntity getEntity(int id)
+	{
+		for (ClientEntity ce : entities)
+		{
+			if (ce.getId() == id)
+			{
+				return ce;
+			}
+		}
+		
+		return null;
+	}
+	
 	
 	private void connect()
 	{

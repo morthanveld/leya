@@ -27,7 +27,7 @@ public class Player extends Ship
 	
 	public Player(StarshipServer server, ConnectionHandler connection)
 	{
-		super((byte) 0, Entity.ENTITY_PLAYER);
+		super(Entity.ENTITY_PLAYER);
 		this.connection = connection;
 		this.server = server;
 		

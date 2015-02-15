@@ -11,12 +11,12 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 
 public class Rock extends Prop
 {
-	private int id = 0;
+	//private int id = 0;
 	
 	public Rock()
 	{
 		super();
-		id = Utils.getUniqueId();
+		//id = Utils.getUniqueId();
 	}
 	
 	public void createBody(Vector2 position)
@@ -60,8 +60,10 @@ public class Rock extends Prop
 		shape.dispose();
 	}
 	
+	/*
 	public int getId()
 	{
 		return this.id;
 	}
+	*/
 }

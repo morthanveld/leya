@@ -19,15 +19,15 @@ public class Ship extends Entity
 	private float axialThrustPower;
 	
 	// Unique id per ship.
-	private byte id;
+	//private byte id;
 	
 	// Health of ship.
 	private float hullIntegrity;
 	
-	public Ship(byte id, short type)
+	public Ship(int type)
 	{
 		super(type);
-		this.id = id;
+		//this.id = id;
 		this.hullIntegrity = 100.0f;
 	}
 
@@ -91,15 +91,17 @@ public class Ship extends Entity
 		this.hullIntegrity = hullIntegrity;
 	}
 
-
+/*
 	public byte getId() {
 		return id;
 	}
+*/
 
-
+	/*
 	protected void setId(byte id) {
 		this.id = id;
 	}
+	*/
 
 
 	public float getLateralThrustPower() {

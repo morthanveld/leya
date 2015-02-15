@@ -9,9 +9,8 @@ import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
-public class Prop 
+public class Prop extends ClientEntity
 {
-	private int id;
 	private Vector2 position;
 	private float direction;
 	private Vector3 scale;
@@ -23,7 +22,8 @@ public class Prop
 	
 	public Prop(int id, Vector2 position, float direction)
 	{
-		this.id = id;
+		super(id);
+		
 		this.position = position;
 		this.direction = direction;
 		this.scale = new Vector3(1.0f, 1.0f, 1.0f);
@@ -48,11 +48,6 @@ public class Prop
 		batch.end();
 	}
 	
-	public int getId()
-	{
-		return this.id;
-	}
-
 	public float getDirection() 
 	{
 		return direction;

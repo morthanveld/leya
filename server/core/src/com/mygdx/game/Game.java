@@ -153,8 +153,8 @@ public class Game
 			{
 				if (e instanceof Player)
 				{
-					((Player) e).update(dt);
-					((Player) e).addPacket(levelData);
+//					((Player) e).update(dt);
+//					((Player) e).addPacket(levelData);
 				}
 			}
 			
