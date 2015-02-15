@@ -68,14 +68,14 @@ public class Game
 	
 	public void loadLevel()
 	{
-		Rock r = new Rock();
-		r.createBody(new Vector2(0.0f, 0.0f));
-		this.entities.add(r);
-		Rock s = new Rock();
-		s.createBody(new Vector2(0.1f, 0.0f));
-		this.entities.add(s);
-		
-		Wave w = new Wave(10);
+		for (int i = 0; i < 10; i++)
+		{
+			Rock r = new Rock();
+			r.createBody(Utils.downScale(new Vector2(Utils.getNextRandom() * 2000.0f - 1000.0f, Utils.getNextRandom() * 2000.0f - 1000.0f)));
+			this.entities.add(r);
+		}
+			
+		Wave w = new Wave(20);
 		w.addSpawnLocation(new SpawnLocation(this, Utils.downScale(new Vector2(200.0f, 200.0f))));
 		w.addSpawnLocation(new SpawnLocation(this, Utils.downScale(new Vector2(-300.0f, 300.0f))));
 		this.waves.add(w);
@@ -291,7 +291,19 @@ public class Game
 		PrioritySteering<Vector2> prioritySteeringSB = new PrioritySteering<Vector2>(e, 0.0001f);
 		prioritySteeringSB.add(collisionAvoidanceSB);
 		prioritySteeringSB.add(w);
+
+		//TODO: This does not work. Need to fix!! 
 		
+		// Set enemy to pursue player.
+		for (Entity entity : entities)
+		{
+			if (entity instanceof Player)
+			{
+				Player p = (Player) entity;
+				prioritySteeringSB.add(new Pursue<Vector2>(entity, p));
+			}
+		}
+
 		e.setSteeringBehavior(prioritySteeringSB);
 		
 		entities.add(e);
