@@ -272,7 +272,7 @@ public class Game extends ApplicationAdapter
 							if (type == Entity.ENTITY_PROP)
 							{
 								Gdx.app.log("client-game", "new entity prop ");
-								Prop prop = new Prop(pid, new Vector2(x, y), dir);					
+								Prop prop = new Prop(pid, new Vector2(x, y), dir);
 								entities.add(prop);
 							}
 							

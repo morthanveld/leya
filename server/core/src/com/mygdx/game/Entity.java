@@ -1,5 +1,6 @@
 package com.mygdx.game;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.steer.Steerable;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -82,7 +83,9 @@ public class Entity implements Steerable<Vector2>
 		}
 		else
 		{
-			System.err.println("Entity: Body is not null.");
+			//System.err.println("Entity: Body is not null.");
+			Gdx.app.log("entity-server", "body already created, adding another fixturedef");
+			this.body.createFixture(fixtureDef);
 		}
 	}
 	

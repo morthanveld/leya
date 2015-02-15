@@ -27,10 +27,10 @@ public class Prop extends ClientEntity
 		this.position = position;
 		this.direction = direction;
 		this.scale = new Vector3(1.0f, 1.0f, 1.0f);
-		this.scale.scl(0.1f);
+		//this.scale.scl(0.1f);
 		
 		batch = new SpriteBatch();
-		img = new Texture("test.png");		
+		img = new Texture("rock-1.png");		
 		shape = new ShapeRenderer();
 	}
 	
