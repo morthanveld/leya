@@ -233,7 +233,7 @@ public class Game extends ApplicationAdapter
 				//String[] list = regexPattern.split(a.subSequence(0, a.length()));
 				String[] list = regexPattern.split(a);
 				
-				System.out.println(a);
+				//System.out.println(a);
 				
 				// Check if position data.
 				if (Byte.valueOf(list[0]) == Packet.POSITION)
@@ -259,6 +259,7 @@ public class Game extends ApplicationAdapter
 
 							if (type == Entity.ENTITY_PLAYER || type == Entity.ENTITY_ENEMY)
 							{
+								Gdx.app.log("client-game", "new entity player or enemy ");
 								ClientShip player = new ClientShip(pid, null);
 								player.setPosition(x, y);
 								player.setDirection(dir);
@@ -268,13 +269,12 @@ public class Game extends ApplicationAdapter
 								System.out.println("new player " + pid);
 							}
 							
-							/*
 							if (type == Entity.ENTITY_PROP)
 							{
-								Prop prop = new Prop(id, new Vector2(x, y), dir);					
+								Gdx.app.log("client-game", "new entity prop ");
+								Prop prop = new Prop(pid, new Vector2(x, y), dir);					
 								entities.add(prop);
 							}
-							*/
 							
 							//ships.put(pid, player);
 							
@@ -286,19 +286,19 @@ public class Game extends ApplicationAdapter
 
 							if (ce instanceof ClientShip)
 							{
+								Gdx.app.log("client-game", "update existing entity player or enemy");
 								ClientShip cs = (ClientShip) ce;
 								cs.setPosition(x, y);
 								cs.setDirection(dir);
 							}
 							
-							/*
 							if (ce instanceof Prop)
 							{
+								Gdx.app.log("client-game", "update existing entity prop");
 								Prop prop = (Prop) ce;
 								prop.setPosition(new Vector2(x, y));
 								prop.setDirection(dir);
 							}
-							*/
 							
 							// Update existing player.
 							//System.out.println("client: update other player " + pid + "\t" + x + "\t" + y);
@@ -356,7 +356,8 @@ public class Game extends ApplicationAdapter
 				
 				if (Byte.valueOf(list[0]) == Packet.LEVEL)
 				{
-					System.out.println("LEVEL DATA: " + a);
+					//System.out.println("LEVEL DATA: " + a);
+					Gdx.app.log("client-game", "received level data " + a);
 
 					/*
 					int count = (list.length - 1)/5;
