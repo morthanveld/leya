@@ -23,13 +23,23 @@ public class Enemy extends Ship
 
 		// Setup speeds for AI.
 		super.setBoundingRadius(Utils.downScale(32.0f));
+		/*
 		super.setMaxLinearSpeed(0.01f);
 		super.setMaxLinearAcceleration(0.05f);
 		super.setMaxAngularSpeed(0.1f);
 		super.setMaxAngularAcceleration(0.01f);
-		
 		super.setAxialThrustPower(0.03f);
 		super.setLongitudinalThrustPower(0.1f);
+		super.setLateralThrustPower(0.1f);
+		*/
+		
+		
+		super.setMaxLinearSpeed(0.001f);
+		super.setMaxLinearAcceleration(0.005f);
+		super.setMaxAngularSpeed(0.1f);
+		super.setMaxAngularAcceleration(0.01f);
+		super.setAxialThrustPower(0.03f);
+		super.setLongitudinalThrustPower(1.1f);
 		super.setLateralThrustPower(0.1f);
 	}
 	
@@ -38,8 +48,8 @@ public class Enemy extends Ship
 		BodyDef bodyDef = new BodyDef();
 		bodyDef.type = BodyType.DynamicBody;
 		bodyDef.position.set(position);
-		bodyDef.angularDamping = 0.5f;
-		bodyDef.linearDamping = 0.2f;
+		bodyDef.angularDamping = 0.9f;
+		bodyDef.linearDamping = 0.9f;
 
 		CircleShape circle = new CircleShape();
 		circle.setRadius(super.getBoundingRadius());
@@ -90,6 +100,10 @@ public class Enemy extends Ship
 
 			super.setAxialThrust(-diff / 45.0f * super.getMaxAngularAcceleration());
 			//angularAcceleration = -diff / 45.0f * this.maxAngularAcceleration;
+			
+			Vector2 pos = new Vector2(this.getPosition());
+			pos.add(steeringOutput.linear);
+			getBody().setTransform(pos, 0);
 		}
 	}
 

@@ -68,7 +68,7 @@ public class Game
 	
 	public void loadLevel()
 	{
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < 1; i++)
 		{
 			Rock r = new Rock();
 			r.createBody(Utils.downScale(new Vector2(Utils.getNextRandom() * 2000.0f - 1000.0f, Utils.getNextRandom() * 2000.0f - 1000.0f)));
@@ -77,7 +77,7 @@ public class Game
 			
 		Wave w = new Wave(20);
 		w.addSpawnLocation(new SpawnLocation(this, Utils.downScale(new Vector2(200.0f, 200.0f))));
-		w.addSpawnLocation(new SpawnLocation(this, Utils.downScale(new Vector2(-300.0f, 300.0f))));
+		//w.addSpawnLocation(new SpawnLocation(this, Utils.downScale(new Vector2(-300.0f, 300.0f))));
 		this.waves.add(w);
 		
 /*		
@@ -251,6 +251,7 @@ public class Game
 		
 		Gdx.app.debug("game", "add player " + p.getId());
 		
+		/*
 		for (Entity entity : entities)
 		{
 			if (entity instanceof Enemy)
@@ -258,6 +259,7 @@ public class Game
 				((Enemy) entity).setSteeringBehavior(new Pursue<Vector2>(entity, p));
 			}
 		}
+		*/
 
 		this.numPlayers++;
 	}
@@ -280,7 +282,7 @@ public class Game
 		w.setWanderOffset(Utils.downScale(100));
 		w.setWanderOrientation(Utils.downScale(10));
 		w.setWanderRadius(Utils.downScale(300));
-		w.setWanderRate(MathUtils.PI * 100);
+		w.setWanderRate(MathUtils.PI * 0.1f);
 				
 		// Collision avoidance behavior.
 		RadiusProximity<Vector2> rp = new RadiusProximity<Vector2>(e, entities, Utils.downScale(300.0f));
@@ -291,10 +293,11 @@ public class Game
 		PrioritySteering<Vector2> prioritySteeringSB = new PrioritySteering<Vector2>(e, 0.0001f);
 		prioritySteeringSB.add(collisionAvoidanceSB);
 		prioritySteeringSB.add(w);
-
+		
 		//TODO: This does not work. Need to fix!! 
 		
 		// Set enemy to pursue player.
+		/*
 		for (Entity entity : entities)
 		{
 			if (entity instanceof Player)
@@ -303,6 +306,7 @@ public class Game
 				prioritySteeringSB.add(new Pursue<Vector2>(entity, p));
 			}
 		}
+		*/
 
 		e.setSteeringBehavior(prioritySteeringSB);
 		

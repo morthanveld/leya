@@ -126,7 +126,7 @@ public class ClientShip extends ClientEntity
 		}
 		else if(type == Entity.ENTITY_ENEMY)
 		{
-			this.img = new Texture("alien.png");
+			this.img = new Texture("sampleShip3.png");
 		}
 	}
 }

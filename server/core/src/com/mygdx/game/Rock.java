@@ -11,12 +11,16 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 
 public class Rock extends Prop
 {
-	//private int id = 0;
-	
 	public Rock()
 	{
 		super();
-		//id = Utils.getUniqueId();
+		
+		// Setup speeds for AI.
+		super.setBoundingRadius(Utils.downScale(64.0f * 3.0f));
+		super.setMaxLinearSpeed(0.0f);
+		super.setMaxLinearAcceleration(0.0f);
+		super.setMaxAngularSpeed(0.0f);
+		super.setMaxAngularAcceleration(0.0f);
 	}
 	
 	public void createBody(Vector2 position)
@@ -26,25 +30,6 @@ public class Rock extends Prop
 		bodyDef.position.set(position);
 		bodyDef.angularDamping = 0.5f;
 		bodyDef.linearDamping = 0.2f;
-
-		/*
-		int c = 5;
-		Vector2[] vertices = new Vector2[c];
-		for (int i = 0; i < c; i++)
-		{
-			Vector2 r = new Vector2(Utils.getNextRandom(), Utils.getNextRandom());
-			r.scl(2.0f);
-			r.sub(1.0f, 1.0f);
-			r.nor();
-			r.scl(2.0f);
-			r.add(position);
-			
-			vertices[i] = new Vector2(r);
-		}
-		
-		PolygonShape shape = new PolygonShape();
-		shape.set(vertices);
-		*/
 		
 		CircleShape shape1 = new CircleShape();
 		shape1.setPosition(Utils.downScale(new Vector2(-64.0f, -64.0f)));
@@ -53,9 +38,7 @@ public class Rock extends Prop
 		CircleShape shape2 = new CircleShape();
 		shape2.setPosition(Utils.downScale(new Vector2(64.0f, 64.0f)));
 		shape2.setRadius(Utils.downScale(128.0f));
-		
-//		System.out.println(shape.getVertexCount());
-
+	
 		FixtureDef fixtureDef1 = new FixtureDef();
 		fixtureDef1.shape = shape1;
 		fixtureDef1.density = 0.5f; 
@@ -80,11 +63,4 @@ public class Rock extends Prop
 		shape1.dispose();
 		shape2.dispose();
 	}
-	
-	/*
-	public int getId()
-	{
-		return this.id;
-	}
-	*/
 }
