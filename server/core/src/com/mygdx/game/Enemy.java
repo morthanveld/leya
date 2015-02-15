@@ -19,7 +19,7 @@ public class Enemy extends Ship
 	
 	public Enemy()
 	{
-		super((byte) (int) (Math.random() * 100.0f + 1.0f), Entity.ENTITY_ENEMY);
+		super(Entity.ENTITY_ENEMY);
 
 		// Setup speeds for AI.
 		super.setBoundingRadius(Utils.downScale(32.0f));

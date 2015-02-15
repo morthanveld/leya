@@ -24,9 +24,10 @@ public class Game
 	private Array<Wave> waves = null;
 	
 	static final int STATE_LOBBY = 0x1;
-	static final int STATE_START = 0x2;
-	static final int STATE_RUNNING = 0x3;
-	static final int STATE_END = 0x4;
+	static final int STATE_LOADING_LEVEL = 0x2;
+	static final int STATE_START = 0x3;
+	static final int STATE_GAME_RUNNING = 0x4;
+	static final int STATE_END = 0x5;
 	
 	private int state = 0;
 	private World world = null;
@@ -62,19 +63,19 @@ public class Game
 		this.state = STATE_LOBBY;
 		
 		// TODO: Only to get game testing started.
-		nextState();
+		//nextState();
 	}
 	
 	public void loadLevel()
 	{
-		Rock r = new Rock();
-		r.createBody(new Vector2(0.0f, 0.0f));
-		this.entities.add(r);
-		Rock s = new Rock();
-		s.createBody(new Vector2(0.1f, 0.0f));
-		this.entities.add(s);
-		
-		Wave w = new Wave(10);
+		for (int i = 0; i < 10; i++)
+		{
+			Rock r = new Rock();
+			r.createBody(Utils.downScale(new Vector2(Utils.getNextRandom() * 2000.0f - 1000.0f, Utils.getNextRandom() * 2000.0f - 1000.0f)));
+			this.entities.add(r);
+		}
+			
+		Wave w = new Wave(20);
 		w.addSpawnLocation(new SpawnLocation(this, Utils.downScale(new Vector2(200.0f, 200.0f))));
 		w.addSpawnLocation(new SpawnLocation(this, Utils.downScale(new Vector2(-300.0f, 300.0f))));
 		this.waves.add(w);
@@ -117,6 +118,50 @@ public class Game
 			
 			break;
 		}
+		case STATE_LOADING_LEVEL:
+		{
+			// Send level information to players. Levels are procedurally created by the server.
+			System.out.println("Sending level data in update.");
+
+			// Compile packet.
+			StringBuffer a = new StringBuffer();
+			a.append(Packet.LEVEL);
+			
+			for (Entity e : entities)
+			{
+				if (e instanceof Rock)
+				{
+					Rock r = (Rock) e;
+					a.append(";");
+					a.append(r.getId());
+					a.append(";");
+					a.append("0"); // TYPE
+					a.append(";");
+					a.append(r.getPosition().x);
+					a.append(";");
+					a.append(r.getPosition().y);
+					a.append(";");
+					a.append(r.getDirection());
+				}
+			}
+			
+			a.append("\n");
+			
+			Packet levelData = new Packet(a.toString().getBytes());
+			
+			for (Entity e : entities)
+			{
+				if (e instanceof Player)
+				{
+					((Player) e).update(dt);
+					((Player) e).addPacket(levelData);
+				}
+			}
+			
+			this.nextState();
+			
+			break;
+		}
 		case STATE_START:
 		{
 			// Start current wave.
@@ -129,7 +174,7 @@ public class Game
 			
 			break;
 		}
-		case STATE_RUNNING:
+		case STATE_GAME_RUNNING:
 		{
 			// Step box2d physics.
 			this.world.step(dt, VELOCITY_ITERATIONS, POSITION_ITERATIONS);
@@ -246,10 +291,32 @@ public class Game
 		PrioritySteering<Vector2> prioritySteeringSB = new PrioritySteering<Vector2>(e, 0.0001f);
 		prioritySteeringSB.add(collisionAvoidanceSB);
 		prioritySteeringSB.add(w);
+
+		//TODO: This does not work. Need to fix!! 
 		
+		// Set enemy to pursue player.
+		for (Entity entity : entities)
+		{
+			if (entity instanceof Player)
+			{
+				Player p = (Player) entity;
+				prioritySteeringSB.add(new Pursue<Vector2>(entity, p));
+			}
+		}
+
 		e.setSteeringBehavior(prioritySteeringSB);
 		
 		entities.add(e);
+	}
+	
+	public void createRock(Vector2 position)
+	{
+		// Create rock.
+		Rock rock = new Rock();
+		rock.createBody(position);
+		this.entities.add(rock);
+		
+		// Send
 	}
 	
 	public void nextState()
@@ -268,14 +335,14 @@ public class Game
 			Gdx.app.debug("game", "state start");
 			break;
 		}
-		case STATE_RUNNING:
+		case STATE_GAME_RUNNING:
 		{
 			Gdx.app.debug("game", "state running");
 			break;
 		}
 		}
 		
-		if (state > 4)
+		if (state > Game.STATE_END)
 		{
 			state = Game.STATE_END;
 		}

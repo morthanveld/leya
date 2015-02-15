@@ -104,6 +104,21 @@ public class StarshipServer extends ApplicationAdapter
 					a.append(s.getDirection());
 				}
 			}
+			
+			if (e instanceof Rock)
+			{
+				Rock r = (Rock) e;
+				a.append(";");
+				a.append(r.getId());
+				a.append(";");
+				a.append(r.getType());
+				a.append(";");
+				a.append(r.getPosition().x);
+				a.append(";");
+				a.append(r.getPosition().y);
+				a.append(";");
+				a.append(r.getDirection());
+			}
 		}
 		
 		a.append("\n");

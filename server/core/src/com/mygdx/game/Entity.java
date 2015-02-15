@@ -1,5 +1,6 @@
 package com.mygdx.game;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.steer.Steerable;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -10,13 +11,13 @@ import com.badlogic.gdx.physics.box2d.World;
 
 public class Entity implements Steerable<Vector2>
 {
-	public static short ENTITY_WORLD = 1;
-	public static short ENTITY_PLAYER = 2;
-	public static short ENTITY_ENEMY = 3;
-	public static short ENTITY_BULLET = 4;
-	public static short ENTITY_PROP = 5;
+	public static int ENTITY_WORLD = 1;
+	public static int ENTITY_PLAYER = 2;
+	public static int ENTITY_ENEMY = 3;
+	public static int ENTITY_BULLET = 4;
+	public static int ENTITY_PROP = 5;
 	
-	private short type = 0;
+	private int type = 0;
 	private Body body = null;
 	private World world = null;
 	
@@ -29,11 +30,29 @@ public class Entity implements Steerable<Vector2>
 	
 	private boolean scheduleDestruction = false;
 	
+	private int id = 0;
+	
 	// TODO: MUST FIX DESTROY OF ENTITY
-	public Entity(short type)
+	public Entity(int type)
 	{
+		if (type != ENTITY_PLAYER)
+		{
+			// If entity is a player, id get set later.
+			this.id = Utils.getUniqueId();
+		}
 		this.type = type;
 		this.world = WorldSingleton.getInstance().getWorld();
+	}
+	
+	
+	public int getId()
+	{
+		return this.id;
+	}
+	
+	protected void setId(int id)
+	{
+		this.id = id;
 	}
 	
 	public void destroy()
@@ -64,7 +83,9 @@ public class Entity implements Steerable<Vector2>
 		}
 		else
 		{
-			System.err.println("Entity: Body is not null.");
+			//System.err.println("Entity: Body is not null.");
+			Gdx.app.log("entity-server", "body already created, adding another fixturedef");
+			this.body.createFixture(fixtureDef);
 		}
 	}
 	
@@ -73,7 +94,7 @@ public class Entity implements Steerable<Vector2>
 		return this.body;
 	}
 
-	public short getType()
+	public int getType()
 	{
 		return this.type;
 	}

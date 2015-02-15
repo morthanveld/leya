@@ -11,9 +11,11 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.net.Socket;
 import com.badlogic.gdx.net.SocketHints;
 import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.Entity;
 import com.mygdx.game.Event;
 import com.mygdx.game.Utils;
 
@@ -36,7 +38,9 @@ public class Game extends ApplicationAdapter
 	
 	byte id = 0;
 	
-	private HashMap<Byte, ClientShip> ships;
+	//private HashMap<Byte, ClientShip> ships;
+	
+	private Array<ClientEntity> entities = null;
 	
 	private float ioTimer = 0.0f;
 	
@@ -52,8 +56,11 @@ public class Game extends ApplicationAdapter
 	private int state = 0;
 	
 	static final int STATE_LOBBY = 0x1;
-	static final int STATE_WAITING = 0x2;
-	static final int STATE_RUNNING = 0x3;
+	static final int STATE_WAITING_FOR_PLAYERS = 0x2;
+	static final int STATE_LOADING_LEVEL = 0x3;
+	static final int STATE_GAME_RUNNING = 0x4;
+	
+	private Array<Prop> props = null;
 	
 	@Override
 	public void create () 
@@ -77,13 +84,20 @@ public class Game extends ApplicationAdapter
 		
 		
 		
-		ships = new HashMap<Byte, ClientShip>();
+		//ships = new HashMap<Byte, ClientShip>();
+		
+		entities = new Array<ClientEntity>();
 		
 		projectileManager = new ProjectileManager();
 			
 		clientInput = new ClientInput(ship);
 		
-		ships.put(id, ship);
+		props = new Array<Prop>();
+		
+		//ships.put(id, ship);
+		
+		entities.add(ship);
+		
 		//Gdx.input.setInputProcessor(clientInput);
 
 		lobby = new Lobby(this);
@@ -114,23 +128,51 @@ public class Game extends ApplicationAdapter
 			this.lobby.update(dt);
 			this.lobby.render();
 		}
-		else if (this.state == STATE_WAITING)
+		else if (this.state == STATE_WAITING_FOR_PLAYERS)
 		{
 			// Set input to ship control.
 			clientInput = new ClientInput(ship);
 			Gdx.input.setInputProcessor(clientInput);
 			nextState();
 		}
-		else if (this.state == STATE_RUNNING)
+		else if (this.state == STATE_LOADING_LEVEL)
+		{
+			// Wait for level to load.
+			System.out.println("STATE_LOADING_LEVEL");
+			nextState();
+		}
+		else if (this.state == STATE_GAME_RUNNING)
 		{
 			space.update(dt);
 			space.render(camera, ship);
+			
+			for (ClientEntity entity : entities)
+			{
+				if (entity instanceof ClientShip)
+				{
+					ClientShip cs = (ClientShip) entity;
+					cs.update(dt);
+					cs.render(camera);	
+				}
+				
+				if (entity instanceof Prop)
+				{
+					Prop cp = (Prop) entity;
+					cp.render(camera);
+				}
+			}
 
+			/*
 			for(ClientShip player : ships.values())
 			{
-				player.update(dt);
-				player.render(camera);
+				
 			}
+			
+			for (Prop p : props)
+			{
+				
+			}
+			*/
 
 			// Render projectiles.
 			projectileManager.updatePhysics(dt);
@@ -202,37 +244,77 @@ public class Game extends ApplicationAdapter
 					
 					for (int i = 0; i < numPlayers; i++)
 					{
-						
-						byte pid = Byte.valueOf(list[i * 5 + 1]).byteValue();
-						byte type = Byte.valueOf(list[i * 5 + 2]).byteValue();
+						int pid = Integer.valueOf(list[i * 5 + 1]).intValue();
+						int type = Integer.valueOf(list[i * 5 + 2]).intValue();
 						float x = Utils.upScale(Float.valueOf(list[i * 5 + 3]).floatValue());
 						float y = Utils.upScale(Float.valueOf(list[i * 5 + 4]).floatValue());
 						float dir = Float.valueOf(list[i * 5 + 5]).floatValue();
 											
 						// Other player data.
-						if (!ships.containsKey(pid))
+						//if (!ships.containsKey(pid))
+						if (!entityExists(pid))
 						{
 							// Create new player.
 							//								System.out.println("client: new other player data                                   !!!!!!!!!!!!!!!!!!   " + pid + "\t" + this.id);
 
-
-							ClientShip player = new ClientShip(pid, null);
-							player.setPosition(x, y);
-							player.setDirection(dir);
-							player.setType(type);
-							ships.put(pid, player);
+							if (type == Entity.ENTITY_PLAYER || type == Entity.ENTITY_ENEMY)
+							{
+								Gdx.app.log("client-game", "new entity player or enemy ");
+								ClientShip player = new ClientShip(pid, null);
+								player.setPosition(x, y);
+								player.setDirection(dir);
+								player.setType(type);
+								entities.add(player);
+								
+								System.out.println("new player " + pid);
+							}
+							
+							if (type == Entity.ENTITY_PROP)
+							{
+								Gdx.app.log("client-game", "new entity prop ");
+								Prop prop = new Prop(pid, new Vector2(x, y), dir);
+								entities.add(prop);
+							}
+							
+							//ships.put(pid, player);
+							
 
 						}
 						else
 						{
+							ClientEntity ce = getEntity(pid);
+
+							if (ce instanceof ClientShip)
+							{
+								Gdx.app.log("client-game", "update existing entity player or enemy");
+								ClientShip cs = (ClientShip) ce;
+								cs.setPosition(x, y);
+								cs.setDirection(dir);
+							}
+							
+							if (ce instanceof Prop)
+							{
+								Gdx.app.log("client-game", "update existing entity prop");
+								Prop prop = (Prop) ce;
+								prop.setPosition(new Vector2(x, y));
+								prop.setDirection(dir);
+							}
+							
 							// Update existing player.
 							//System.out.println("client: update other player " + pid + "\t" + x + "\t" + y);
 
-							ClientShip player = ships.get(pid);
+							//ClientShip player = ships.get(pid);
+							
+							/*
+							ClientShip player = (ClientShip) getEntity(pid);
 							player.setPosition(x, y);
 							player.setDirection(dir);
+							*/
+							
 							//player.setType(type);
-							ships.put(pid, player);
+							//ships.put(pid, player);
+							
+							// TODO: Might not work??!
 						}
 					}
 				}
@@ -271,6 +353,31 @@ public class Game extends ApplicationAdapter
 						}
 					}
 				}
+				
+				if (Byte.valueOf(list[0]) == Packet.LEVEL)
+				{
+					//System.out.println("LEVEL DATA: " + a);
+					Gdx.app.log("client-game", "received level data " + a);
+
+					/*
+					int count = (list.length - 1)/5;
+					
+					for (int i = 0; i < count; i++)
+					{
+						int id = Byte.valueOf(list[i * 5 + 1]).intValue();
+						int type = Byte.valueOf(list[i * 5 + 2]).intValue();
+						float x = Utils.upScale(Float.valueOf(list[i * 5 + 3]).floatValue());
+						float y = Utils.upScale(Float.valueOf(list[i * 5 + 4]).floatValue());
+						float dir = Float.valueOf(list[i * 5 + 5]).floatValue();
+						
+						Prop prop = new Prop(id, new Vector2(x, y), dir);					
+						entities.add(prop);
+					}
+					*/
+					
+					// When level received, next game state.
+					this.nextState();
+				}
 			}
 			else
 			{
@@ -281,8 +388,44 @@ public class Game extends ApplicationAdapter
 	
 	private void destroyEntity(byte id)
 	{
-		ships.remove(id);
+		//ships.remove(id);
+		for (int i = 0; i < entities.size; i++)
+		{
+			ClientEntity ce = entities.get(i);
+			if (ce.getId() == id)
+			{
+				entities.removeIndex(i);
+				break;
+			}
+		}
 	}
+	
+	private boolean entityExists(int id)
+	{
+		for (ClientEntity ce : entities)
+		{
+			if (ce.getId() == id)
+			{
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	private ClientEntity getEntity(int id)
+	{
+		for (ClientEntity ce : entities)
+		{
+			if (ce.getId() == id)
+			{
+				return ce;
+			}
+		}
+		
+		return null;
+	}
+	
 	
 	private void connect()
 	{
@@ -292,7 +435,7 @@ public class Game extends ApplicationAdapter
         socketHints.connectTimeout = 4000;
         
         //create the socket and connect to the server entered in the text box ( x.x.x.x format ) on port 9021
-        socket = Gdx.net.newClientSocket(Protocol.TCP, "127.0.0.1", 1313, socketHints);
+        socket = Gdx.net.newClientSocket(Protocol.TCP, "127.0.0.1", 1315, socketHints);
         
         System.out.println("Connected to server " + socket.getRemoteAddress());
         
@@ -377,15 +520,20 @@ public class Game extends ApplicationAdapter
 		{
 		case STATE_LOBBY:
 		{
-			this.state = STATE_WAITING;
+			this.state = STATE_LOADING_LEVEL;
 			break;
 		}
-		case STATE_WAITING:
+		case STATE_LOADING_LEVEL:
 		{
-			this.state = STATE_RUNNING;
+			this.state = STATE_WAITING_FOR_PLAYERS;
 			break;
 		}
-		case STATE_RUNNING:
+		case STATE_WAITING_FOR_PLAYERS:
+		{
+			this.state = STATE_GAME_RUNNING;
+			break;
+		}
+		case STATE_GAME_RUNNING:
 		{
 			break;
 		}

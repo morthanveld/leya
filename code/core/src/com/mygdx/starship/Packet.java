@@ -7,6 +7,7 @@ public class Packet
 	public static final byte POSITION = 0x3;
 	public static final byte PROJECTILE = 0x4;
 	public static final byte EVENT = 0x5;
+	public static final byte LEVEL = 0x6;
 	
 	private byte[] data = null;
 	

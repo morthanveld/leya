@@ -2,30 +2,30 @@ package com.mygdx.game;
 
 public class Event 
 {
-	public static final byte EVENT_ENTITY_DESTROY = 0x1;
-	public static final byte EVENT_PLAYER_READY = 0x2;
+	public static final int EVENT_ENTITY_DESTROY = 0x1;
+	public static final int EVENT_PLAYER_READY = 0x2;
 	
-	private byte type = 0;
-	private byte entityId;
+	private int type = 0;
+	private int entityId;
 	
-	public byte getType()
+	public int getType()
 	{
 		return this.type;
 	}
 	
-	public void createEntityDestroy(byte entityId)
+	public void createEntityDestroy(int entityId)
 	{
 		this.type = EVENT_ENTITY_DESTROY;
 		this.entityId = entityId;
 	}
 	
-	public void createPlayerReady(byte entityId)
+	public void createPlayerReady(int entityId)
 	{
 		this.type = EVENT_PLAYER_READY;
 		this.entityId = entityId;
 	}
 	
-	public byte getEntityId()
+	public int getEntityId()
 	{
 		return entityId;
 	}
