@@ -62,6 +62,8 @@ public class Game extends ApplicationAdapter
 	
 	private Array<Prop> props = null;
 	
+	private EffectsManager effectsManager = null;
+	
 	@Override
 	public void create () 
 	{
@@ -105,6 +107,8 @@ public class Game extends ApplicationAdapter
 		this.state = STATE_LOBBY;
 		
 		Gdx.app.setLogLevel(3);
+		
+		effectsManager = new EffectsManager();
 	}
 
 	@Override
@@ -177,6 +181,10 @@ public class Game extends ApplicationAdapter
 			// Render projectiles.
 			projectileManager.updatePhysics(dt);
 			projectileManager.render(camera);
+			
+			// Update and render effects.
+			effectsManager.update(dt);
+			effectsManager.render(camera);
 		}
 
 		outboxSum += connectionHandler.getOutboxSize();
@@ -259,7 +267,7 @@ public class Game extends ApplicationAdapter
 
 							if (type == Entity.ENTITY_PLAYER || type == Entity.ENTITY_ENEMY)
 							{
-								Gdx.app.log("client-game", "new entity player or enemy ");
+								//Gdx.app.log("client-game", "new entity player or enemy ");
 								ClientShip player = new ClientShip(pid, null);
 								player.setPosition(x, y);
 								player.setDirection(dir);
@@ -271,7 +279,7 @@ public class Game extends ApplicationAdapter
 							
 							if (type == Entity.ENTITY_PROP)
 							{
-								Gdx.app.log("client-game", "new entity prop ");
+								//Gdx.app.log("client-game", "new entity prop ");
 								Prop prop = new Prop(pid, new Vector2(x, y), dir);
 								entities.add(prop);
 							}
@@ -286,7 +294,7 @@ public class Game extends ApplicationAdapter
 
 							if (ce instanceof ClientShip)
 							{
-								Gdx.app.log("client-game", "update existing entity player or enemy");
+								//Gdx.app.log("client-game", "update existing entity player or enemy");
 								ClientShip cs = (ClientShip) ce;
 								cs.setPosition(x, y);
 								cs.setDirection(dir);
@@ -294,7 +302,7 @@ public class Game extends ApplicationAdapter
 							
 							if (ce instanceof Prop)
 							{
-								Gdx.app.log("client-game", "update existing entity prop");
+								//Gdx.app.log("client-game", "update existing entity prop");
 								Prop prop = (Prop) ce;
 								prop.setPosition(new Vector2(x, y));
 								prop.setDirection(dir);
@@ -349,6 +357,32 @@ public class Game extends ApplicationAdapter
 						if (type ==  Event.EVENT_ENTITY_DESTROY)
 						{
 							System.out.println("destroy " + pid);
+							
+							ClientEntity e = getEntity(pid);
+							
+							if (e instanceof ClientShip)
+							{
+								ClientShip cs = (ClientShip) e;
+								effectsManager.createParticleEffect(0, cs.getPosition());
+								Gdx.app.log("client-game", "create particle destroy");
+							}
+							
+							destroyEntity(pid);
+						}
+						
+						if (type ==  Event.EVENT_ENTITY_COLLISION)
+						{
+							System.out.println("collision " + pid);
+							
+							ClientEntity e = getEntity(pid);
+							
+							if (e instanceof ClientShip)
+							{
+								ClientShip cs = (ClientShip) e;
+								effectsManager.createParticleEffect(0, cs.getPosition());
+								Gdx.app.log("client-game", "create particle collision");
+							}
+							
 							destroyEntity(pid);
 						}
 					}

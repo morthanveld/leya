@@ -319,6 +319,11 @@ public class Game
 		// Send
 	}
 	
+	public void addEvent(Event e)
+	{
+		this.events.add(e);
+	}
+	
 	public void nextState()
 	{
 		state++;

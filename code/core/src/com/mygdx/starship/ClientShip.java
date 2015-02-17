@@ -1,7 +1,9 @@
 package com.mygdx.starship;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
@@ -29,6 +31,8 @@ public class ClientShip extends ClientEntity
 	
 	private ShapeRenderer shape = null;
 	
+	//private ParticleEffect pe = null;
+	
 	public ClientShip(int id, ConnectionHandler connection)
 	{
 		super(id);
@@ -48,6 +52,13 @@ public class ClientShip extends ClientEntity
 		scale = new Vector3(0.5f, 0.5f, 0.5f);		
 		
 		shape = new ShapeRenderer();
+		
+		/*
+		pe = new ParticleEffect();
+		pe.load(Gdx.files.internal("test.ps"), Gdx.files.internal(""));
+		pe.getEmitters().first().setPosition(1280 /2 , 720 /2);
+		pe.start();
+		*/
 	}
 	
 	public ConnectionHandler getConnectionHandler()
@@ -61,6 +72,8 @@ public class ClientShip extends ClientEntity
 		
 		// Update weapon.
 		weapon.update(dt);
+		
+		//pe.update(dt);
 	}
 	
 	public void render(OrthographicCamera camera)
@@ -75,6 +88,7 @@ public class ClientShip extends ClientEntity
 		batch.setProjectionMatrix(camera.combined);
 		batch.begin();
 		batch.draw(img, -img.getWidth() * 0.5f, -img.getHeight() * 0.5f);
+		//pe.draw(batch);
 		batch.end();
 		
 		/*

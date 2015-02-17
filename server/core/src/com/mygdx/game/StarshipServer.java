@@ -47,7 +47,7 @@ public class StarshipServer extends ApplicationAdapter
 		
 		Gdx.app.setLogLevel(3);
 			
-		ContactListener cl = new ContactListener(this);
+		ContactListener cl = new ContactListener(this, game);
 		
 		// Start listening on incoming clients.
 		listen();

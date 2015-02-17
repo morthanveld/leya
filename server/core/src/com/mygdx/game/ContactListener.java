@@ -10,12 +10,14 @@ public class ContactListener implements com.badlogic.gdx.physics.box2d.ContactLi
 {
 	private World world = null;
 	private StarshipServer server = null;
+	private Game game = null;
 	
-	public ContactListener(StarshipServer ss)
+	public ContactListener(StarshipServer ss, Game game)
 	{
 		world = WorldSingleton.getInstance().getWorld();
 		world.setContactListener(this);
 		server = ss;
+		this.game = game;  
 	}
 
 	@Override
@@ -40,6 +42,19 @@ public class ContactListener implements com.badlogic.gdx.physics.box2d.ContactLi
 				{
 					((Ship) b).impact((Bullet) a);
 					((Bullet) a).scheduleDestruction();					
+				}
+				
+				if (a instanceof Ship && b instanceof Prop)
+				{
+					Event e = new Event();
+					e.createEntityCollision(a.getId());
+					this.game.addEvent(e);
+				}
+				else if (b instanceof Ship && a instanceof Prop)
+				{
+					Event e = new Event();
+					e.createEntityCollision(b.getId());
+					this.game.addEvent(e);
 				}
 			}
 		}
