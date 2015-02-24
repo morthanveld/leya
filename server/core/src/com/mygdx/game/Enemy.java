@@ -79,15 +79,20 @@ public class Enemy extends Ship
 			Vector2 dd = new Vector2(0.0f, 1.0f);
 			dd.rotate(super.getDirection());
 			float vv = ll.dot(dd);
-			super.setLongitudinalThrust(vv);
+			//super.setLongitudinalThrust(vv);
 			//acceleration.set(0.0f, vv);
 
 			//System.out.println("linear: " + ll + "\t" + acceleration);
-			//System.out.println(steeringOutput.linear);
+			
 
 			Vector2 linear = new Vector2(steeringOutput.linear);
 			Vector2 from = new Vector2(0.0f, 1.0f);
-			newDirection = from.angle(linear);
+			if (!linear.isZero(0.01f))
+			{
+				newDirection = from.angle(linear.nor());
+			}
+			
+			System.out.println(steeringOutput.linear + "\t" + steeringOutput.angular);
 
 			Vector2 dv = new Vector2(0.0f, 1.0f);
 			dv.rotate(super.getDirection());
@@ -98,12 +103,16 @@ public class Enemy extends Ship
 			float damp = (Math.abs(diff)/360.0f);
 			super.setAngularDamping(Math.max(1.0f - damp * damp * damp, 0.5f));
 
-			super.setAxialThrust(-diff / 45.0f * super.getMaxAngularAcceleration());
+			//super.setAxialThrust(-diff / 45.0f * super.getMaxAngularAcceleration());
 			//angularAcceleration = -diff / 45.0f * this.maxAngularAcceleration;
 			
 			Vector2 pos = new Vector2(this.getPosition());
 			pos.add(steeringOutput.linear);
-			getBody().setTransform(pos, 0);
+			//getBody().setTransform(pos, 0.0f);
+			
+			//super.setAxialThrust(steeringOutput.angular);
+			
+			
 		}
 	}
 

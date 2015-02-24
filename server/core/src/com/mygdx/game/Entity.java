@@ -128,7 +128,7 @@ public class Entity implements Steerable<Vector2>
 		
 		return 0.0f;
 	}
-	
+		
 	public float getAngularVelocity()
 	{
 		if (body != null)
@@ -195,10 +195,12 @@ public class Entity implements Steerable<Vector2>
 		this.maxAngularAcceleration = maxAngularAcceleration;
 	}
 
+	
 	public float getOrientation() 
 	{
 		return getDirection();
 	}
+	
 	
 	protected void setBoundingRadius(float boundingRadius)
 	{

@@ -3,8 +3,11 @@ package com.mygdx.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.ai.steer.behaviors.CollisionAvoidance;
+import com.badlogic.gdx.ai.steer.behaviors.Face;
 import com.badlogic.gdx.ai.steer.behaviors.PrioritySteering;
 import com.badlogic.gdx.ai.steer.behaviors.Pursue;
+import com.badlogic.gdx.ai.steer.behaviors.ReachOrientation;
+import com.badlogic.gdx.ai.steer.behaviors.Seek;
 import com.badlogic.gdx.ai.steer.behaviors.Wander;
 import com.badlogic.gdx.ai.steer.proximities.RadiusProximity;
 import com.badlogic.gdx.graphics.GL20;
@@ -278,22 +281,24 @@ public class Game
 		
 		// Wander behavior.
 		Wander<Vector2> w = new Wander<Vector2>(e);
-		w.setFaceEnabled(false);
-		w.setWanderOffset(Utils.downScale(100));
-		w.setWanderOrientation(Utils.downScale(10));
-		w.setWanderRadius(Utils.downScale(300));
-		w.setWanderRate(MathUtils.PI * 0.1f);
+		w.setFaceEnabled(true);
+		w.setWanderOffset(0.001f);
+		w.setWanderOrientation(90.0f);
+		w.setWanderRadius(0.01f);
+		w.setWanderRate(0.1f);
 				
 		// Collision avoidance behavior.
 		RadiusProximity<Vector2> rp = new RadiusProximity<Vector2>(e, entities, Utils.downScale(300.0f));
 		this.proximities.add(rp);
 		CollisionAvoidance<Vector2> collisionAvoidanceSB = new CollisionAvoidance<Vector2>(e, rp);
 		
+		//Seek<Vector2>
+		
 		// Add behaviors.
 		PrioritySteering<Vector2> prioritySteeringSB = new PrioritySteering<Vector2>(e, 0.0001f);
-		prioritySteeringSB.add(collisionAvoidanceSB);
-		prioritySteeringSB.add(w);
-		
+		//prioritySteeringSB.add(collisionAvoidanceSB);
+		//prioritySteeringSB.add(w);
+			
 		//TODO: This does not work. Need to fix!! 
 		
 		// Set enemy to pursue player.
@@ -307,8 +312,18 @@ public class Game
 			}
 		}
 		*/
+		
+		Enemy target = new Enemy();
+		target.createBody(Utils.downScale(new Vector2(100.0f, 0.0f)));
+		entities.add(target);
+		
+		//Seek<Vector2> s = new Seek<Vector2>(e, target); // WORKING
+		//Face<Vector2> b = new Face<Vector2>(e, target);
+		//b.setEnabled(true);
+		ReachOrientation<Vector2> ro = new ReachOrientation<Vector2>(e, target);
+		ro.setEnabled(true);
 
-		e.setSteeringBehavior(prioritySteeringSB);
+		e.setSteeringBehavior(ro);
 		
 		entities.add(e);
 	}
