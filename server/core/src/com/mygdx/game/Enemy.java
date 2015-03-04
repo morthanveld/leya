@@ -74,7 +74,33 @@ public class Enemy extends Ship
 		{
 			// Calculate steering acceleration
 			steeringBehavior.calculateSteering(steeringOutput);
-
+			
+			//System.out.println(steeringOutput.linear + "\t" + steeringOutput.angular);
+			
+			Vector2 linear = new Vector2(steeringOutput.linear);
+			float linearScale = linear.len();
+			linear = linear.nor();
+			
+			Vector2 from = new Vector2(0.0f, 1.0f);
+			from = from.rotate(getBody().getAngle() * 180.0f / 3.141592f).nor();
+						
+			float longThrust = Math.max(0.0f, linear.dot(from) * linearScale * 1000.0f * dt);
+			//System.out.println(Math.max(0.0f, longThrust * linearScale));
+			
+			float targetAngle = linear.angle(from);
+			float currentAngle = getBody().getAngle() * 180.0f / 3.141592f;
+			float axialThrust = (targetAngle - currentAngle) * 0.1f * dt;
+			
+			System.out.println("target: " + targetAngle + "\t" + "current: " + currentAngle);
+					
+			super.setLongitudinalThrust(longThrust);
+			super.setAxialThrust(axialThrust);
+			
+			//Vector2 a = new Vector2(getBody().getTransform().getPosition());
+			//a.add(steeringOutput.linear);
+			//getBody().getTransform().setPosition(a);
+			
+			/*
 			Vector2 ll = new Vector2(steeringOutput.linear);
 			Vector2 dd = new Vector2(0.0f, 1.0f);
 			dd.rotate(super.getDirection());
@@ -106,12 +132,10 @@ public class Enemy extends Ship
 			//super.setAxialThrust(-diff / 45.0f * super.getMaxAngularAcceleration());
 			//angularAcceleration = -diff / 45.0f * this.maxAngularAcceleration;
 			
-			Vector2 pos = new Vector2(this.getPosition());
-			pos.add(steeringOutput.linear);
-			//getBody().setTransform(pos, 0.0f);
+			
 			
 			//super.setAxialThrust(steeringOutput.angular);
-			
+			*/
 			
 		}
 	}

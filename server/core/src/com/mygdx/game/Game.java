@@ -281,21 +281,27 @@ public class Game
 		
 		// Wander behavior.
 		Wander<Vector2> w = new Wander<Vector2>(e);
-		w.setFaceEnabled(true);
-		w.setWanderOffset(0.001f);
-		w.setWanderOrientation(90.0f);
-		w.setWanderRadius(0.01f);
-		w.setWanderRate(0.1f);
+		w.setFaceEnabled(false);
+		//w.setAlignTolerance(0.1f);
+		//w.setDecelerationRadius(0.02f);
+		//w.setTimeToTarget(1.0f);
+		w.setWanderOffset(0.0f);
+		w.setWanderOrientation(0.0f);
+		w.setWanderRadius(0.2f);
+		w.setWanderRate(10.0f/60.0f);
+		w.setEnabled(true);
 				
 		// Collision avoidance behavior.
+		/*
 		RadiusProximity<Vector2> rp = new RadiusProximity<Vector2>(e, entities, Utils.downScale(300.0f));
 		this.proximities.add(rp);
 		CollisionAvoidance<Vector2> collisionAvoidanceSB = new CollisionAvoidance<Vector2>(e, rp);
+		*/
 		
 		//Seek<Vector2>
 		
 		// Add behaviors.
-		PrioritySteering<Vector2> prioritySteeringSB = new PrioritySteering<Vector2>(e, 0.0001f);
+		//PrioritySteering<Vector2> prioritySteeringSB = new PrioritySteering<Vector2>(e, 0.0001f);
 		//prioritySteeringSB.add(collisionAvoidanceSB);
 		//prioritySteeringSB.add(w);
 			
@@ -313,17 +319,17 @@ public class Game
 		}
 		*/
 		
-		Enemy target = new Enemy();
-		target.createBody(Utils.downScale(new Vector2(100.0f, 0.0f)));
-		entities.add(target);
+		//Enemy target = new Enemy();
+		//target.createBody(Utils.downScale(new Vector2(100.0f, 0.0f)));
+		//entities.add(target);
 		
 		//Seek<Vector2> s = new Seek<Vector2>(e, target); // WORKING
 		//Face<Vector2> b = new Face<Vector2>(e, target);
 		//b.setEnabled(true);
-		ReachOrientation<Vector2> ro = new ReachOrientation<Vector2>(e, target);
-		ro.setEnabled(true);
+		//ReachOrientation<Vector2> ro = new ReachOrientation<Vector2>(e, target);
+		//ro.setEnabled(true);
 
-		e.setSteeringBehavior(ro);
+		e.setSteeringBehavior(w);
 		
 		entities.add(e);
 	}
