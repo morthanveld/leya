@@ -2,6 +2,7 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.ai.steer.behaviors.Arrive;
 import com.badlogic.gdx.ai.steer.behaviors.CollisionAvoidance;
 import com.badlogic.gdx.ai.steer.behaviors.Face;
 import com.badlogic.gdx.ai.steer.behaviors.PrioritySteering;
@@ -78,7 +79,7 @@ public class Game
 			this.entities.add(r);
 		}
 			
-		Wave w = new Wave(20);
+		Wave w = new Wave(1);
 		w.addSpawnLocation(new SpawnLocation(this, Utils.downScale(new Vector2(200.0f, 200.0f))));
 		//w.addSpawnLocation(new SpawnLocation(this, Utils.downScale(new Vector2(-300.0f, 300.0f))));
 		this.waves.add(w);
@@ -280,17 +281,20 @@ public class Game
 		e.createBody(position);
 		
 		// Wander behavior.
+		/*
 		Wander<Vector2> w = new Wander<Vector2>(e);
 		w.setFaceEnabled(false);
 		//w.setAlignTolerance(0.1f);
 		//w.setDecelerationRadius(0.02f);
 		//w.setTimeToTarget(1.0f);
-		w.setWanderOffset(0.0f);
+		w.setWanderOffset(0.1f);
 		w.setWanderOrientation(0.0f);
-		w.setWanderRadius(0.2f);
-		w.setWanderRate(10.0f/60.0f);
+		w.setWanderRadius(0.01f);
+		//w.setWanderRate(1200.0f/60.0f);
+		w.setWanderRate(1.0f/10.0f * 100000.0f);
 		w.setEnabled(true);
-				
+			
+				*/
 		// Collision avoidance behavior.
 		/*
 		RadiusProximity<Vector2> rp = new RadiusProximity<Vector2>(e, entities, Utils.downScale(300.0f));
@@ -319,19 +323,45 @@ public class Game
 		}
 		*/
 		
-		//Enemy target = new Enemy();
-		//target.createBody(Utils.downScale(new Vector2(100.0f, 0.0f)));
-		//entities.add(target);
+		/*
+		Enemy target = new Enemy();
+		target.createBody(Utils.downScale(new Vector2(-100.0f, 400.0f)));
+		entities.add(target);
+		*/
 		
 		//Seek<Vector2> s = new Seek<Vector2>(e, target); // WORKING
 		//Face<Vector2> b = new Face<Vector2>(e, target);
 		//b.setEnabled(true);
 		//ReachOrientation<Vector2> ro = new ReachOrientation<Vector2>(e, target);
 		//ro.setEnabled(true);
-
-		e.setSteeringBehavior(w);
+		
+		/*
+		Arrive<Vector2> arr = new Arrive<Vector2>(e, target);
+		arr.setTimeToTarget(10.0f);
+		arr.setArrivalTolerance(0.0001f);
+		arr.setDecelerationRadius(Utils.downScale(10.0f));
+		*/
 		
 		entities.add(e);
+		
+		for (Entity entity : entities)
+		{
+			if (entity instanceof Player)
+			{
+				Player p = (Player) entity;
+				/*
+				ReachOrientation<Vector2> ro = new ReachOrientation<Vector2>(e, entity);
+				ro.setAlignTolerance(0.000001f);
+				ro.setDecelerationRadius(0.000001f);
+				ro.setTimeToTarget(0.1f);
+				e.setSteeringBehavior(ro);
+				*/
+				
+				e.setTarget(p);
+			}
+		}
+				
+		
 	}
 	
 	public void createRock(Vector2 position)

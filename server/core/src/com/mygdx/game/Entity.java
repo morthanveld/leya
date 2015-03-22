@@ -19,7 +19,7 @@ public class Entity implements Steerable<Vector2>
 	
 	private int type = 0;
 	private Body body = null;
-	private World world = null;
+	protected World world = null;
 	
 	private boolean tagged = false;
 	private float boundingRadius = 0.0f;
