@@ -23,6 +23,9 @@ public class Enemy extends Ship implements RayCastCallback
 	
 	private float newDirection;
 	
+	private Vector2 rayHitNormal = null;
+	private Vector2 rayHitPoint = null;
+	
 	public Enemy()
 	{
 		super(Entity.ENTITY_ENEMY);
@@ -77,9 +80,9 @@ public class Enemy extends Ship implements RayCastCallback
 	public void updateAi(float dt)
 	{
 		{
-			avoidCollision();
-			float angular = this.faceBehavior();
-			super.setAxialThrust(angular * dt);
+			float a = -avoidCollision();
+			a = (Math.abs(a) > 0.001f) ? a : faceBehavior();
+			super.setAxialThrust(a * dt);
 			
 			super.setLongitudinalThrust(arriveBehavior() * 10.0f * dt);
 		}
@@ -204,7 +207,28 @@ public class Enemy extends Ship implements RayCastCallback
 		currentDirection.nor();
 		currentDirection.scl(2.0f);
 		
-		this.world.rayCast(this, p, currentDirection);
+		Vector2 target = new Vector2(p);
+		target.add(currentDirection);
+		
+		if (this.rayHitNormal == null)
+		{
+			this.world.rayCast(this, p, target);
+		}
+		
+		if (this.rayHitNormal != null)
+		{
+			// Avoid object by steer in opposite direction.
+			Vector2 wing = new Vector2(1.0f, 0.0f);
+			wing.rotateRad(getBody().getAngle());
+			wing.nor();
+			
+			float v = this.rayHitNormal.dot(wing);
+			
+			this.rayHitNormal = null;
+			this.rayHitPoint = null;
+			
+			return 1.0f - v;
+		}
 			
 		return 0.0f;
 	}
@@ -237,15 +261,17 @@ public class Enemy extends Ship implements RayCastCallback
 	{
 		if (fixture.getBody().getUserData() != null)
 		{
-			Entity e = (Entity) fixture.getBody().getUserData();
+			/*Entity e = (Entity) fixture.getBody().getUserData();
 			if (e.getType() == Entity.ENTITY_PLAYER)
 			{
 				System.out.println("player detection");
 			}
-		}
-		else
-		{
-			System.out.println("collision detection");
+			else*/
+			{
+				System.out.println("collision detection");
+				this.rayHitNormal = new Vector2(normal);
+				this.rayHitPoint = new Vector2(point);
+			}
 		}
 		
 		return 0;
