@@ -31,16 +31,8 @@ public class ContactListener implements com.badlogic.gdx.physics.box2d.ContactLi
 			
 			if (a != null && b != null)
 			{
-				if (a instanceof Ship && b instanceof Bullet)
-				{
-					((Ship) a).impact((Bullet) b);
-					((Bullet) b).scheduleDestruction();
-				}
-				else if (b instanceof Ship && a instanceof Bullet)
-				{
-					((Ship) b).impact((Bullet) a);
-					((Bullet) a).scheduleDestruction();					
-				}
+				a.impact(b);
+				b.impact(a);
 			}
 		}
 	}

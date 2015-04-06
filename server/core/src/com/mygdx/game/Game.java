@@ -72,14 +72,15 @@ public class Game
 	
 	public void loadLevel()
 	{
-		for (int i = 0; i < 1; i++)
+		for (int i = 0; i < 3; i++)
 		{
 			Rock r = new Rock();
 			r.createBody(Utils.downScale(new Vector2(Utils.getNextRandom() * 2000.0f - 1000.0f, Utils.getNextRandom() * 2000.0f - 1000.0f)));
+			
 			this.entities.add(r);
 		}
 			
-		Wave w = new Wave(1);
+		Wave w = new Wave(10);
 		w.addSpawnLocation(new SpawnLocation(this, Utils.downScale(new Vector2(200.0f, 200.0f))));
 		//w.addSpawnLocation(new SpawnLocation(this, Utils.downScale(new Vector2(-300.0f, 300.0f))));
 		this.waves.add(w);
@@ -195,13 +196,31 @@ public class Game
 			{
 				if (e instanceof Enemy)
 				{
-					((Enemy) e).updateAi(dt);
+					Enemy enemy = (Enemy) e;
+					enemy.updateAi(dt);			
 				}
+				
 				if (e instanceof Player)
 				{
-					((Player) e).update(dt);
+					Player p = (Player) e;
+					p.update(dt);
+					p.updatePhysics(dt);
+					
+					if (p.isScheduledDestruction())
+					{
+						// Create event.
+						Event event = new Event();
+						event.createEntityDestroy(p.getId());
+						events.add(event);
+						
+						Gdx.app.debug("game", "destroy ship " + p.getId());
+						//p.destroy();
+						//entities.removeValue(e, false);
+						
+						// Reset scheduled destruction?
+					}
 				}
-				if (e instanceof Ship)
+				else if (e instanceof Ship)
 				{
 					Ship s = (Ship) e;
 					s.updatePhysics(dt);
@@ -216,7 +235,7 @@ public class Game
 						s.destroy();
 						entities.removeValue(e, false);
 					}
-				}					
+				}				
 			}
 			
 			// Update projectiles.

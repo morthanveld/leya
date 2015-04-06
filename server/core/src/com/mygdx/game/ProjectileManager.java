@@ -130,7 +130,7 @@ public class ProjectileManager
 	
 	public void create(Vector2 pos, Vector2 vel, float l)
 	{	
-		Bullet p = new Bullet(world, projectileId++);//, pos, vel, l);
+		Bullet p = new Bullet(world, projectileId++, 40.0f);//, pos, vel, l);
 		p.createBody(pos, vel);
 		
 		synchronized (projectileArrayLock)

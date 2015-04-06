@@ -79,92 +79,72 @@ public class Enemy extends Ship implements RayCastCallback
 	
 	public void updateAi(float dt)
 	{
+		Vector2 position = this.getPosition();
+		
+		// Prepare ray cast in front of ship.
+		float rayLength = 2.0f;
+		float rayFov = (float) Math.PI * 0.25f;
+		Vector2 ray = new Vector2(0.0f, 1.0f);
+		ray.rotateRad(getBody().getAngle() + ((float) Math.random() * 2.0f - 1.0f) * rayFov);
+		ray.nor();
+		ray.scl(rayLength);
+		
+		Vector2 rayTarget = new Vector2(position);
+		rayTarget.add(ray);
+		
+		// Cast ray.
+		if (this.rayHitNormal == null)
 		{
-			float a = -avoidCollision();
-			a = (Math.abs(a) > 0.001f) ? a : faceBehavior();
-			super.setAxialThrust(a * dt);
-			
-			super.setLongitudinalThrust(arriveBehavior() * 10.0f * dt);
+			this.world.rayCast(this, position, rayTarget);
 		}
 		
-		if (steeringBehavior != null) 
+		// Calculate speed, arrives on target.
+		float stopAtDistance = 0.0f;
+		float slowDownDistance = 1.0f;
+		Vector2 targetPosition = new Vector2(target.getPosition());
+		float d = Math.max(targetPosition.sub(position).len() - stopAtDistance, 0.0f);
+		float speed = d / slowDownDistance;
+		
+		// Ray hits something.
+		if (this.rayHitNormal != null)
 		{
-			// Calculate steering acceleration
-			steeringBehavior.calculateSteering(steeringOutput);
+			Vector2 rayHitPosition = new Vector2(this.rayHitPoint);
+			rayHitPosition.sub(position);
 			
-			System.out.println(steeringOutput.linear + "\t" + steeringOutput.angular);
+			float distance = rayHitPosition.len();
+		
+			// Avoid object by steer in opposite direction.
+			Vector2 wing = new Vector2(1.0f, 0.0f);
+			wing.rotateRad(getBody().getAngle());
+			wing.nor();
 			
-			Vector2 linear = new Vector2(steeringOutput.linear);
-			float linearScale = linear.len();
-			linear = linear.nor();
+			float v = 1.0f - this.rayHitNormal.dot(wing);
 			
+			this.rayHitNormal = null;
+			this.rayHitPoint = null;
+			
+			super.setAxialThrust(v * dt);
+			super.setLongitudinalThrust(distance / rayLength * 0.2f);
+		}
+		else
+		{
+			targetPosition = new Vector2(target.getPosition());
+			targetPosition.sub(position);
+			targetPosition.nor();
+			
+			// Current direction vector.
 			Vector2 currentDirection = new Vector2(0.0f, 1.0f);
 			currentDirection.rotateRad(getBody().getAngle());
 			
-			//System.out.println("linear: " + linear + "\tangular: " + steeringOutput.angular * 180.0f / 3.141592f + "\tdirection: " + currentDirection);
+			float steering = targetPosition.angleRad(currentDirection) / MathUtils.PI * -1.0f;
 			
-			{
-				float angular = this.faceBehavior();
-				super.setAxialThrust(angular * 1000.0f * dt);
-			}
-			
+			//System.out.println("t: " + t + "\t c: " + currentDirection + "\t r: " + steering);
 		
-			//float longThrust = Math.max(0.0f, linear.dot(from) * linearScale * 500.0f * dt);
-			//System.out.println(Math.max(0.0f, longThrust * linearScale));
-			
-			//float targetAngle = linear.angle(from.scl(-1.0f));
-			//float currentAngle = getBody().getAngle() * 180.0f / 3.141592f;
-			//float axialThrust = (targetAngle - currentAngle) * 0.05f * dt;
-			
-			//System.out.println("target: " + targetAngle + "\t" + "current: " + currentAngle + "\tlinear: " + steeringOutput.linear.angle());
-					
-			//super.setLongitudinalThrust(longThrust);
-			//super.setAxialThrust(axialThrust);
-			
-			//Vector2 a = new Vector2(getBody().getTransform().getPosition());
-			//a.add(steeringOutput.linear);
-			//getBody().getTransform().setPosition(a);
-			
-			/*
-			Vector2 ll = new Vector2(steeringOutput.linear);
-			Vector2 dd = new Vector2(0.0f, 1.0f);
-			dd.rotate(super.getDirection());
-			float vv = ll.dot(dd);
-			//super.setLongitudinalThrust(vv);
-			//acceleration.set(0.0f, vv);
-
-			//System.out.println("linear: " + ll + "\t" + acceleration);
-			
-
-			Vector2 linear = new Vector2(steeringOutput.linear);
-			Vector2 from = new Vector2(0.0f, 1.0f);
-			if (!linear.isZero(0.01f))
-			{
-				newDirection = from.angle(linear.nor());
-			}
-			
-			System.out.println(steeringOutput.linear + "\t" + steeringOutput.angular);
-
-			Vector2 dv = new Vector2(0.0f, 1.0f);
-			dv.rotate(super.getDirection());
-
-			float diff = linear.angle(dv);
-
-			float as = super.getAngularVelocity();
-			float damp = (Math.abs(diff)/360.0f);
-			super.setAngularDamping(Math.max(1.0f - damp * damp * damp, 0.5f));
-
-			//super.setAxialThrust(-diff / 45.0f * super.getMaxAngularAcceleration());
-			//angularAcceleration = -diff / 45.0f * this.maxAngularAcceleration;
-			
-			
-			
-			//super.setAxialThrust(steeringOutput.angular);
-			*/
-			
+			super.setAxialThrust(steering * dt);		
+			super.setLongitudinalThrust(speed * 10.0f * dt);
 		}
 	}
-	
+	/*
 	private float faceBehavior()
 	{
 		Vector2 t = target.getPosition();
@@ -202,7 +182,7 @@ public class Enemy extends Ship implements RayCastCallback
 	{
 		Vector2 p = this.getPosition();
 		Vector2 currentDirection = new Vector2(0.0f, 1.0f);
-		currentDirection.rotateRad(getBody().getAngle());
+		currentDirection.rotateRad(getBody().getAngle() + ((float) Math.random() * 2.0f - 1.0f) * (float) Math.PI * 0.5f);
 		
 		currentDirection.nor();
 		currentDirection.scl(2.0f);
@@ -217,6 +197,12 @@ public class Enemy extends Ship implements RayCastCallback
 		
 		if (this.rayHitNormal != null)
 		{
+			Vector2 d = new Vector2(this.rayHitPoint);
+			d.sub(p);
+			
+			float distance = d.len();
+			System.out.println("distance: " + distance);
+			
 			// Avoid object by steer in opposite direction.
 			Vector2 wing = new Vector2(1.0f, 0.0f);
 			wing.rotateRad(getBody().getAngle());
@@ -238,6 +224,7 @@ public class Enemy extends Ship implements RayCastCallback
 		// Interc
 		return 0.0f;
 	}
+	*/
 
 	public SteeringBehavior<Vector2> getSteeringBehavior() 
 	{

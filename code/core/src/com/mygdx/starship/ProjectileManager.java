@@ -1,21 +1,20 @@
 package com.mygdx.starship;
 
-import java.util.HashMap;
-
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 
 public class ProjectileManager
 {
-	private HashMap<Integer, Projectile> projs;
 	private ShapeRenderer shape = null;
+	private Array<Vector2> projectileArray = null;
 	
 	public ProjectileManager()
 	{
-		projs = new HashMap<Integer, Projectile>();
 		shape = new ShapeRenderer();
+		projectileArray = new Array<Vector2>(200);
 	}
 	
 	public void render(Camera camera)
@@ -26,42 +25,28 @@ public class ProjectileManager
 		shape.begin(ShapeType.Filled);
 		shape.setColor(1, 0, 0, 1);
 		
-		for (Projectile p : projs.values())
+		Vector2 v = null;
+		for (int i = 0; i < projectileArray.size; i++)
 		{
-			Vector2 pos = p.getPosition();
-			//shape.circle(pos.x, pos.y, 3.0f);
-			shape.line(p.getOldPosition(), pos);
+			v = projectileArray.get(i);
+			shape.circle(v.x, v.y, 3.0f);
 		}
-		
+			
 		shape.end();
 	}
 	
 	public void updatePhysics(float dt)
 	{
+		
 	}
 	
 	public void clear()
 	{
-		projs.clear();
+		projectileArray.clear();
 	}
 	
 	public void addProjectile(int id, float x, float y, float vx, float vy)
 	{
-		if (projs.containsKey(id))
-		{
-			// Update projectile.
-			Projectile p = projs.get(id);
-			p.setPosition(x, y);
-			p.setAlive(true);
-		}
-		else
-		{
-			// Create new projectile.
-			Projectile p = new Projectile(id);
-			p.setPosition(x, y);
-			p.setVelocity(vx, vy);
-			p.setAlive(true);
-			projs.put(id, p);
-		}
+		projectileArray.add(new Vector2(x, y));
 	}
 }

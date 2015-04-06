@@ -22,7 +22,7 @@ public class Ship extends Entity
 	//private byte id;
 	
 	// Health of ship.
-	private float hullIntegrity;
+	protected float hullIntegrity;
 	
 	public Ship(int type)
 	{
@@ -49,9 +49,17 @@ public class Ship extends Entity
 		//System.out.println(id + " | " + connection.getInboxSize() + " | " + connection.getOutboxSize());
 	}
 	
-	public void impact(Bullet b)
+	public void impact(Entity e)
 	{
-		this.hullIntegrity -= 40.0f;
+		if (e instanceof Bullet)
+		{
+			this.hullIntegrity -= ((Bullet) e).getEnergy();
+		}
+		else if (e instanceof Rock)
+		{
+			// Can't have this until AI is good enough to avoid rocks.
+			//this.hullIntegrity -= 20.0f;
+		}
 		
 		if (this.hullIntegrity < 0.01f)
 		{

@@ -137,7 +137,7 @@ public class ClientInput implements InputProcessor
 	private void createOutputPacket()
 	{
 		Weapon w = clientShip.getWeapon();
-		Vector2 pos = w.getWorldPosition();
+		Vector2 pos = new Vector2(w.getWorldPosition());
 		pos.add(clientShip.getPosition());
 		
 		StringBuffer a = new StringBuffer();
@@ -153,8 +153,6 @@ public class ClientInput implements InputProcessor
 		a.append(w.getMouseButton());
 		a.append("\n");
 		
-		//System.out.println("mouse " + a.toString());
-
 		clientShip.getConnectionHandler().addPacket(new Packet(a.toString().getBytes()));
 	}
 

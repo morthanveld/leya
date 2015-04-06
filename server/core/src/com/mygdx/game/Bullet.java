@@ -16,11 +16,12 @@ public class Bullet extends Entity
 	*/
 	private float life;
 	private int id;
+	private float energy;
 
 	private Body body = null;
 	private World world = null;
 	
-	public Bullet(World world, int id)//, Vector2 position, Vector2 velocity, float life)
+	public Bullet(World world, int id, float energy)//, Vector2 position, Vector2 velocity, float life)
 	{
 		super(ENTITY_BULLET);
 		
@@ -32,7 +33,7 @@ public class Bullet extends Entity
 		this.id = id;
 		this.world = world;
 		this.life = 5.0f;
-		
+		this.energy = energy;
 	}
 	
 	public void createBody(Vector2 position, Vector2 velocity)
@@ -75,6 +76,15 @@ public class Bullet extends Entity
 		return (life < 0.0f);
 	}
 	
+	public float getEnergy()
+	{
+		return this.energy;
+	}
+	
+	public void impact(Entity e)
+	{
+		super.scheduleDestruction();
+	}
 	
 	/*
 	public Body getBody()

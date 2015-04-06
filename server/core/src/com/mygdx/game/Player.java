@@ -24,6 +24,7 @@ public class Player extends Ship
 	private static final int KEY_E = 5;
 	
 	private boolean isReady = false;
+	private boolean isDead = false;
 	
 	public Player(StarshipServer server, ConnectionHandler connection)
 	{
@@ -86,6 +87,19 @@ public class Player extends Ship
 
 		// Update ship physics.
 		weapon.update(dt);
+	}
+	
+	public void impact(Entity e)
+	{
+		if (e instanceof Rock)
+		{
+			this.hullIntegrity -= 20.0f;
+		}
+		
+		if (this.hullIntegrity < 0.01f)
+		{
+			this.isDead = true;
+		}
 	}
 	
 	public float calculateOrientationFromLinearVelocity(Vector2 from, Vector2 to)
@@ -209,6 +223,10 @@ public class Player extends Ship
 	public ProjectileManager getProjectileManager()
 	{
 		return server.getGame().getProjectileManager();
+	}
+
+	public boolean isDead() {
+		return isDead;
 	}
 	
 }

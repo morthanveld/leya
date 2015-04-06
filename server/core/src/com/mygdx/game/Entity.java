@@ -89,6 +89,10 @@ public class Entity implements Steerable<Vector2>
 		}
 	}
 	
+	public void impact(Entity e)
+	{
+	}
+	
 	public Body getBody()
 	{
 		return this.body;

@@ -14,8 +14,8 @@ public class Projectile
 	
 	public Projectile(int id)
 	{
-		position = new Vector2();
-		oldPosition = new Vector2();
+		position = new Vector2(0.0f, 0.0f);
+		oldPosition = new Vector2(0.0f, 0.0f);
 		velocity = new Vector2();
 		life = 0.0f;
 		this.id = id;

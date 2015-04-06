@@ -239,7 +239,7 @@ public class Game extends ApplicationAdapter
 				if (Byte.valueOf(list[0]) == Packet.POSITION)
 				{
 					int numPlayers = (list.length - 1)/5;
-					//System.out.println("numplayers: " + numPlayers);
+					System.out.println("numplayers: " + numPlayers);
 					//System.err.println("position data " + a);
 					
 					for (int i = 0; i < numPlayers; i++)
@@ -286,7 +286,7 @@ public class Game extends ApplicationAdapter
 
 							if (ce instanceof ClientShip)
 							{
-								Gdx.app.log("client-game", "update existing entity player or enemy");
+								//Gdx.app.log("client-game", "update existing entity player or enemy");
 								ClientShip cs = (ClientShip) ce;
 								cs.setPosition(x, y);
 								cs.setDirection(dir);
@@ -294,7 +294,7 @@ public class Game extends ApplicationAdapter
 							
 							if (ce instanceof Prop)
 							{
-								Gdx.app.log("client-game", "update existing entity prop");
+								//Gdx.app.log("client-game", "update existing entity prop");
 								Prop prop = (Prop) ce;
 								prop.setPosition(new Vector2(x, y));
 								prop.setDirection(dir);
