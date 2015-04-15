@@ -36,10 +36,10 @@ public class Ship extends Entity
 		Body body = super.getBody();
 		
 		// Apply angular movement to player.
-		body.applyTorque(this.axialThrust, true);
+		body.applyTorque(this.axialThrust * this.axialThrustPower, true);
 
 		// Apply linear movement to player.
-		Vector2 a = new Vector2(0.0f, this.longitudinalThrust);
+		Vector2 a = new Vector2(0.0f, this.longitudinalThrust * this.longitudinalThrustPower);
 		a.rotate(super.getDirection());
 		body.applyForceToCenter(a, true);
  

@@ -39,8 +39,8 @@ public class Player extends Ship
 		super.setMaxAngularAcceleration(1000.0f);
 		
 		// Setup thrusters.
-		super.setAxialThrustPower(0.03f);
-		super.setLongitudinalThrustPower(0.1f);
+		super.setAxialThrustPower(0.1f);
+		super.setLongitudinalThrustPower(0.3f);
 		super.setLateralThrustPower(0.1f);
 		
 		weapon = new Weapon(this);

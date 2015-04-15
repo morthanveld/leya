@@ -239,7 +239,7 @@ public class Game extends ApplicationAdapter
 				if (Byte.valueOf(list[0]) == Packet.POSITION)
 				{
 					int numPlayers = (list.length - 1)/5;
-					System.out.println("numplayers: " + numPlayers);
+					//System.out.println("numplayers: " + numPlayers);
 					//System.err.println("position data " + a);
 					
 					for (int i = 0; i < numPlayers; i++)

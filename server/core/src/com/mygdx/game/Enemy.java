@@ -47,8 +47,8 @@ public class Enemy extends Ship implements RayCastCallback
 		super.setMaxLinearAcceleration(0.005f);
 		super.setMaxAngularSpeed(0.1f);
 		super.setMaxAngularAcceleration(0.01f);
-		super.setAxialThrustPower(0.03f);
-		super.setLongitudinalThrustPower(1.1f);
+		super.setAxialThrustPower(0.1f);
+		super.setLongitudinalThrustPower(0.2f);
 		super.setLateralThrustPower(0.1f);
 	}
 	
@@ -105,6 +105,9 @@ public class Enemy extends Ship implements RayCastCallback
 		float d = Math.max(targetPosition.sub(position).len() - stopAtDistance, 0.0f);
 		float speed = d / slowDownDistance;
 		
+		float longitudinalThrust = 0.0f;
+		float axialThrust = 0.0f;
+		
 		// Ray hits something.
 		if (this.rayHitNormal != null)
 		{
@@ -123,8 +126,8 @@ public class Enemy extends Ship implements RayCastCallback
 			this.rayHitNormal = null;
 			this.rayHitPoint = null;
 			
-			super.setAxialThrust(v * dt);
-			super.setLongitudinalThrust(distance / rayLength * 0.2f);
+			axialThrust = v;
+			longitudinalThrust = distance / rayLength;
 		}
 		else
 		{
@@ -136,13 +139,21 @@ public class Enemy extends Ship implements RayCastCallback
 			Vector2 currentDirection = new Vector2(0.0f, 1.0f);
 			currentDirection.rotateRad(getBody().getAngle());
 			
-			float steering = targetPosition.angleRad(currentDirection) / MathUtils.PI * -1.0f;
+			float steering = targetPosition.angleRad(currentDirection) / MathUtils.PI;
 			
-			//System.out.println("t: " + t + "\t c: " + currentDirection + "\t r: " + steering);
+			System.out.println("dir: " + getBody().getAngle() + "\t steer: " + targetPosition.angleRad(currentDirection));
 		
-			super.setAxialThrust(steering * dt);		
-			super.setLongitudinalThrust(speed * 10.0f * dt);
+			axialThrust = -steering;
+			longitudinalThrust = speed;
 		}
+		
+		axialThrust = Math.max(Math.min(axialThrust, 1.0f), -1.0f);
+		longitudinalThrust = Math.max(Math.min(longitudinalThrust, 1.0f), -1.0f);
+		
+		this.setAxialThrust(axialThrust);
+		this.setLongitudinalThrust(longitudinalThrust);
+		
+		System.out.println("axial thrust: " + axialThrust + "\tlong thrust: " + longitudinalThrust);
 	}
 	/*
 	private float faceBehavior()
